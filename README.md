@@ -1,139 +1,700 @@
 # minius_codex_lab
 
-Current version: **1.0.0-beta.2**
+[![CI](https://github.com/sergeionlyart/minius_codex_lab/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeionlyart/minius_codex_lab/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/sergeionlyart/minius_codex_lab?include_prereleases&label=release)](https://github.com/sergeionlyart/minius_codex_lab/releases)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-research%20beta-orange.svg)](ROADMAP.md)
 
-`minius_codex_lab` is an open-source source repository for Codex skills,
-specialized roles, safety controls, and verifiable-document tooling used to
-build a separate legal-work runtime workspace.
+**Дослідницьке середовище для розроблення й тестування персонального AI-робочого місця юриста.**
 
-> **Independent project and legal-review notice:** this project is not an
-> official product, system, service, or position of the Ministry of Justice of
-> Ukraine, OpenAI, or any other government body or organization. It does not
-> guarantee legal correctness and does not provide an official legal decision.
-> Every legally significant output requires review and approval by a qualified,
-> authorized human.
+`minius_codex_lab` — відкритий репозиторій інструкцій, навичок, ролей, правил безпеки та інструментів перевірюваних документів для OpenAI Codex. Перший профіль проєкту орієнтований на типові функціональні процеси працівника, який працює з юридичними документами в системі Міністерства юстиції України: правовий моніторинг, аналіз законодавства і практики, підготовку юридичних документів, оцінювання регуляторного впливу та перевірку доказової основи висновків.
 
-## Beta status
+> **Статус проєкту:** дослідницька бета-версія. Поточний публічний реліз призначений для тестування на синтетичних, відкритих і знеособлених даних.<br>
+> **Проєкт не є офіційним продуктом, системою, рекомендацією або правовою позицією Міністерства юстиції України, OpenAI чи іншого державного органу.**<br>
+> Будь-який юридично значущий результат має перевіряти й затверджувати кваліфікована уповноважена людина.
 
-`1.0.0-beta.2` is the corrected testing pre-release. `1.0.0-beta.1` is
-superseded and must not be used for legal work because its skill metadata and
-first-run bootstrap gates were incomplete. Interfaces and upgrade procedures
-may still change; existing workspaces are upgraded manually.
+- Концепція: [Legal Copilot Ukraine](https://legal-copilot-ukraine.vercel.app/uk)
+- Репозиторій: [github.com/sergeionlyart/minius_codex_lab](https://github.com/sergeionlyart/minius_codex_lab)
+- Релізи: [GitHub Releases](https://github.com/sergeionlyart/minius_codex_lab/releases)
+- Зауваження та пропозиції: [GitHub Issues](https://github.com/sergeionlyart/minius_codex_lab/issues/new/choose)
 
-## Choose the right installation
+---
 
-### End users: install the Release ZIP
+## Зміст
 
-Do not clone this source repository as a working legal matter. From the GitHub
-Releases page, download:
+- [Навіщо існує проєкт](#навіщо-існує-проєкт)
+- [Зв’язок із концепцією Legal Copilot Ukraine](#звязок-із-концепцією-legal-copilot-ukraine)
+- [Що досліджується](#що-досліджується)
+- [Основні принципи](#основні-принципи)
+- [Що входить до репозиторію](#що-входить-до-репозиторію)
+- [Кому може бути корисний проєкт](#кому-може-бути-корисний-проєкт)
+- [Установлення робочого простору](#установлення-робочого-простору)
+- [Перший безпечний запуск](#перший-безпечний-запуск)
+- [Режими операційної пам’яті](#режими-операційної-памяті)
+- [Перевірюваний юридичний документ](#перевірюваний-юридичний-документ)
+- [Обмеження та безпека](#обмеження-та-безпека)
+- [Розроблення репозиторію](#розроблення-репозиторію)
+- [Зворотний зв’язок і внесок у проєкт](#зворотний-звязок-і-внесок-у-проєкт)
+- [Дорожня карта](#дорожня-карта)
+- [Ліцензія](#ліцензія)
+- [Автор і походження концепції](#автор-і-походження-концепції)
 
-- `minius_codex_lab-workspace-v1.0.0-beta.2.zip`
-- `minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256`
-- `minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json` (SPDX 2.3 SBOM)
+---
 
-Verify the checksum before extraction:
+## Навіщо існує проєкт
+
+Більшість Legal AI-ініціатив намагаються відразу створити одну велику централізовану систему для тисяч користувачів. Такий підхід потребує тривалого збирання вимог, закупівель, розроблення й погоджень, а підсумковий продукт часто виявляється надто усередненим, дорогим у зміні та залежним від одного постачальника.
+
+`minius_codex_lab` досліджує інший підхід: **мінімальне автономне, модульне й розширюване робоче місце окремого юриста**.
+
+Замість розроблення ще одного монолітного сервісу проєкт використовує вже наявне агентне середовище й налаштовує його за допомогою відкритих текстових компонентів:
+
+```text
+мовна модель
++ актуальні дані
++ письмові інструкції
++ спеціалізовані навички
++ вузькі агентні ролі
++ детерміновані інструменти
++ автоматичні перевірки
++ професійне рішення людини
+```
+
+Таке робоче місце можна поступово розвивати від простих дослідницьких завдань до складних проєктів, не перебудовуючи всю систему цілком.
+
+---
+
+## Зв’язок із концепцією Legal Copilot Ukraine
+
+Репозиторій є одним із практичних експериментів у межах концепції [Legal Copilot Ukraine](https://legal-copilot-ukraine.vercel.app/uk).
+
+Концепція пропонує будувати Legal AI-інфраструктуру не як єдину «ідеальну» державну систему, а як **екосистему персональних і командних AI-робочих місць**, об’єднаних:
+
+- якісними й машинозчитуваними правовими даними;
+- єдиними правилами доказовості;
+- відкритими форматами;
+- стандартами робочих артефактів;
+- безпечним розмежуванням доступу;
+- тестами якості;
+- професійною та дослідницькою спільнотою.
+
+`minius_codex_lab` втілює цю ідею в одному конкретному, перевірюваному сценарії: робочому місці юриста, який виконує функції, близькі до завдань Міністерства юстиції України.
+
+Це **не офіційний проєкт Міністерства юстиції**, а відкрита дослідницька гіпотеза, яку необхідно перевіряти практикою, тестами та професійною критикою.
+
+---
+
+## Що досліджується
+
+Проєкт не обмежується створенням одного промпту або одного юридичного чатбота. Досліджується повний робочий контур:
+
+1. Як формалізувати професійні правила юриста в `AGENTS.md`.
+2. Як розділити складну юридичну роботу на незалежні навички.
+3. Як використовувати спеціалізовані агентні ролі без втрати керованості.
+4. Як вести кілька дослідницьких сесій і зберігати операційну пам’ять.
+5. Як відокремити публічні налаштування від матеріалів конкретних справ.
+6. Як перевіряти походження кожного суттєвого висновку.
+7. Як створювати юридичний документ, пов’язаний із точними підтвердними фрагментами джерел.
+8. Як тестувати конфігурації на відтворюваних синтетичних завданнях.
+9. Як переносити найкращі практики окремих фахівців у загальнодоступні конфігурації.
+10. Як адаптувати робоче місце до інших юридичних ролей та установ.
+
+Поточний профіль охоплює процеси:
+
+- постановки й класифікації юридичного доручення;
+- дослідження законодавства України;
+- перевірки редакцій і статусу нормативних актів;
+- аналізу судової та адміністративної практики;
+- правового моніторингу;
+- аналізу права ЄС та acquis;
+- кількісного оцінювання впливу;
+- підготовки записок, висновків, проєктів документів і пропозицій;
+- перевірки джерел і доказового ланцюжка;
+- незалежного юридичного аудиту;
+- редагування та контролю розкриття інформації;
+- міжсесійної передачі контексту;
+- створення перевірюваних HTML- і DOCX-документів.
+
+Архітектура навмисно ширша за перший профіль. Надалі ті самі принципи можна досліджувати для робочих місць судді, адвоката, юриста органу місцевого самоврядування, нормопроєктувальника, викладача, студента й дослідника.
+
+---
+
+## Основні принципи
+
+### 1. Модель — не оракул
+
+Мовна модель використовується як механізм аналізу, зіставлення й підготовки тексту. Вона не є офіційною базою права, не гарантує актуальності норми й не ухвалює юридично значущих рішень.
+
+### 2. Немає джерела — немає сильного висновку
+
+Суттєві правові та фактичні твердження мають простежуватися до першоджерела, конкретної редакції, дати й точного підтвердного фрагмента.
+
+### 3. Результат — не лише фінальний файл
+
+Цінність становить не один `legal-opinion.docx`, а відтворюваний робочий пакет:
+
+```text
+джерела
+→ установлені факти
+→ аналітичні гіпотези
+→ докази й контрдокази
+→ висновки
+→ перевірки
+→ обмеження
+→ фінальний документ
+→ історія змін
+```
+
+### 4. Документ залишається інтерфейсом, а робочий пакет — об’єктом перевірки
+
+Одержувач повинен мати змогу перевірити не лише підсумкове формулювання, а й шлях, яким його було отримано.
+
+### 5. Людина зберігає відповідальність
+
+Юридично значущі висновки, рішення, підписи й офіційне направлення документів залишаються винятковою відповідальністю уповноваженого фахівця.
+
+### 6. Навички мають бути модульними
+
+Повторювана процедура оформлюється як окремий skill. Вузька спеціалізація — як окрема роль. Універсальне правило проєкту — як інструкція в `AGENTS.md`.
+
+### 7. Різні дані потребують різних режимів доступу
+
+Публічне право, інституційні знання, командні артефакти, конфіденційні матеріали справи й персональна пам’ять фахівця не повинні змішуватися в одному публічному сховищі.
+
+### 8. Безпека проєктується до появи реальних даних
+
+Публічний репозиторій містить лише код, інструкції, шаблони, схеми, документацію та явно синтетичні тестові матеріали. Реальні документи не повинні потрапляти до upstream.
+
+### 9. Розвиток відбувається через тестування та спільноту
+
+Кожне поліпшення має бути пов’язане з конкретним користувацьким завданням, відтворюваним прикладом і критерієм приймання. Найкращі перевірені рішення можуть повертатися до спільного репозиторію.
+
+### 10. Не будувати мегасистему завчасно
+
+Проєкт починається з обмеженого робочого місця, зрозумілих сценаріїв, відкритих стандартів і вимірюваного тестування.
+
+---
+
+## Що входить до репозиторію
+
+```text
+minius_codex_lab/
+├── AGENTS.md                  # інструкції для супровідників проєкту
+├── .agents/skills/            # канонічні юридичні skills
+├── .codex/agents/             # спеціалізовані ролі
+├── workspace-template/        # безпечний шаблон користувацького середовища
+├── tools/                     # детерміновані інструменти документів
+├── scripts/                   # валідація, безпека та складання релізу
+├── tests/                     # unit, lifecycle і regression tests
+├── docs/                      # архітектура, сумісність і правила
+└── .github/                   # CI, issue forms і release workflows
+```
+
+Публічний репозиторій та встановлений робочий простір — різні контури:
+
+| Контур | Призначення | Користувацькі дані |
+|---|---|---|
+| Публічний upstream | Вихідний код, тести, документація, CI і складання | Заборонені |
+| Release ZIP | Перевірений порожній runtime-шаблон | Лише шаблони й синтетичні fixtures |
+| Локальний workspace | Робота конкретного користувача | За правилами користувача або організації |
+
+**Звичайному користувачеві не слід використовувати `git clone` публічного репозиторію як папку реальної юридичної справи.** Для роботи призначено ZIP із розділу Releases.
+
+---
+
+## Кому може бути корисний проєкт
+
+- юристам і аналітикам органів державної влади;
+- фахівцям із правового моніторингу та нормотворчості;
+- командам цифрової трансформації;
+- LegalTech-розробникам;
+- дослідникам Legal AI та human-in-the-loop систем;
+- університетам і освітнім програмам;
+- фахівцям з інформаційної безпеки;
+- авторам відкритих юридичних даних і стандартів;
+- професійним спільнотам, які тестують нові моделі юридичної роботи.
+
+---
+
+# Установлення робочого простору
+
+## Вимоги
+
+Для поточного тестового релізу:
+
+- Python 3.11;
+- Git;
+- OpenAI Codex із підтримкою project instructions, skills, roles, hooks і rules;
+- локальна папка, яка не розташована всередині іншого Git-репозиторію;
+- дозвіл вашої організації на використання обраної моделі й оброблення відповідного класу даних.
+
+Актуальна матриця перевіреної сумісності міститься в [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
+
+## 1. Завантажте Release ZIP
+
+Перейдіть до [GitHub Releases](https://github.com/sergeionlyart/minius_codex_lab/releases) і завантажте файли актуального релізу.
+
+Для `v1.0.0-beta.2`:
+
+```text
+minius_codex_lab-workspace-v1.0.0-beta.2.zip
+minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json
+```
+
+Не використовуйте `v1.0.0-beta.1`: цей випуск замінено виправленим `beta.2`.
+
+## 2. Перевірте SHA-256
+
+### Linux
 
 ```bash
 sha256sum -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
 ```
 
-On macOS:
+### macOS
 
 ```bash
 shasum -a 256 -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
 ```
 
-On PowerShell, compare the printed hash with the first value in the
-`.sha256` file:
+### Windows PowerShell
 
 ```powershell
-Get-FileHash .\minius_codex_lab-workspace-v1.0.0-beta.2.zip -Algorithm SHA256
+Get-FileHash `
+  .\minius_codex_lab-workspace-v1.0.0-beta.2.zip `
+  -Algorithm SHA256
 ```
 
-Extract the ZIP into a new local or organization-approved private working
-folder, not over an upstream checkout. Then run:
+Порівняйте отриманий хеш із першим значенням у `.sha256`-файлі.
+
+## 3. Розпакуйте архів
+
+Розпакуйте ZIP у **нову автономну локальну папку**.
+
+Не слід:
+
+- розпаковувати runtime поверх clone публічного upstream;
+- розміщувати workspace всередині іншого Git-репозиторію;
+- підключати публічний remote до папки з робочими матеріалами;
+- додавати реальні документи до завершення smoke-test.
+
+## 4. Установіть залежності й ініціалізуйте workspace
+
+### Linux, macOS або WSL
 
 ```bash
-python3 scripts/validate_workspace.py --mode runtime
-python3 scripts/check_repo_safety.py --profile workspace-local
-python3 scripts/init_workspace.py --memory-mode untracked
+python3.11 -m venv .venv
+
+.venv/bin/python -m pip install \
+  --disable-pip-version-check \
+  -r requirements.txt
+
+.venv/bin/python scripts/validate_workspace.py --mode runtime
+
+.venv/bin/python scripts/check_repo_safety.py \
+  --profile workspace-local
+
+.venv/bin/python scripts/init_workspace.py \
+  --memory-mode untracked
 ```
 
-Read the runtime `README.md`, `AGENTS.md`, and `SECURITY.md` before adding
-documents. A private repository is not automatically an approved store for
-personal, restricted, privileged, or otherwise protected information.
+Якщо Git identity не налаштовано:
 
-### Developers: clone the source
+```bash
+.venv/bin/python scripts/init_workspace.py \
+  --memory-mode untracked \
+  --git-name "Your Name" \
+  --git-email "you@example.org"
+```
 
-Clone the repository only to develop and review the distribution:
+### Windows PowerShell
+
+```powershell
+py -3.11 -m venv .venv
+
+& .\.venv\Scripts\python.exe -m pip install `
+  --disable-pip-version-check `
+  -r .\requirements.txt
+
+& .\.venv\Scripts\python.exe `
+  .\scripts\validate_workspace.py `
+  --mode runtime
+
+& .\.venv\Scripts\python.exe `
+  .\scripts\check_repo_safety.py `
+  --profile workspace-local
+
+& .\.venv\Scripts\python.exe `
+  .\scripts\init_workspace.py `
+  --memory-mode untracked
+```
+
+Докладний Windows-сценарій міститься в `docs/INSTALL_WINDOWS_POWERSHELL.md` усередині розпакованого workspace.
+
+Initializer:
+
+- перевіряє release manifest і структуру;
+- створює автономний локальний Git-репозиторій;
+- створює початковий commit;
+- не створює remote;
+- не виконує push;
+- не додає реальні matters автоматично;
+- фіксує обраний режим пам’яті.
+
+---
+
+# Перший безпечний запуск
+
+## 1. Прочитайте обов’язкові файли
+
+До запуску Codex вивчіть:
+
+```text
+README.md
+AGENTS.md
+SECURITY.md
+.codex/config.toml
+.codex/hooks.json
+.codex/rules/
+docs/CODEX_SMOKE_TEST.md
+docs/GIT_WORKFLOW.md
+```
+
+Особливу увагу приділіть:
+
+- дозволам агентного середовища;
+- мережевому доступу;
+- hooks;
+- command rules;
+- режиму пам’яті;
+- класам даних;
+- заборонам на зовнішнє передавання матеріалів.
+
+## 2. Перевірте довіру до проєкту
+
+Запустіть Codex із Git-кореня workspace.
+
+Надавайте project trust лише після перегляду `.codex/` і `AGENTS.md`.
+
+В інтерфейсі Codex:
+
+1. Виконайте `/hooks`.
+2. Переконайтеся, що відображаються очікувані `SessionStart` і `Stop`.
+3. Перевірте визначення hooks до надання довіри.
+4. Виконайте `/skills`.
+5. Переконайтеся, що виявлено всі 12 project skills.
+6. Через `/agent` перевірте спеціалізовані ролі.
+7. Виконуйте лише синтетичні сценарії з `docs/CODEX_SMOKE_TEST.md`.
+
+Поведінка команд і назви дій інтерфейсу можуть залежати від установленої версії Codex. Не послаблюйте правила безпеки для обходу несумісності — зафіксуйте версію та створіть issue.
+
+## 3. Перевірте command rules
+
+Не виконуючи небезпечних команд:
+
+```bash
+codex execpolicy check \
+  --pretty \
+  --rules .codex/rules/default.rules \
+  -- git push origin main
+
+codex execpolicy check \
+  --pretty \
+  --rules .codex/rules/default.rules \
+  -- git push --force origin main
+```
+
+Очікуваний результат:
+
+```text
+звичайний push      → prompt
+force-push          → forbidden
+```
+
+## 4. Створіть першу синтетичну справу
+
+### POSIX
+
+```bash
+.venv/bin/python scripts/new_matter.py \
+  --id synthetic-001 \
+  --title "Synthetic legal question" \
+  --classification PUBLIC
+
+.venv/bin/python scripts/start_session.py \
+  --slug first-review \
+  --matter synthetic-001 \
+  --create-branch
+
+.venv/bin/python scripts/run_synthetic_e2e.py
+
+.venv/bin/python scripts/validate_workspace.py \
+  --mode operational
+
+.venv/bin/python scripts/check_repo_safety.py \
+  --profile workspace-local
+```
+
+Перший тест має використовувати лише штучні або спеціально підготовлені відкриті матеріали.
+
+---
+
+## Режими операційної пам’яті
+
+Під час ініціалізації обирається один із трьох режимів:
+
+| Режим | Matters і змінювана memory | Remote |
+|---|---|---|
+| `untracked` | Залишаються локальними й ignored | Не створюється |
+| `local-git` | Можуть явно потрапляти до локальних commits | Не створюється |
+| `private-approved` | Як `local-git`, але лише після формального рішення організації | Налаштовується окремо |
+
+Для першого ознайомлення та зовнішнього тестування рекомендовано:
+
+```bash
+python scripts/init_workspace.py --memory-mode untracked
+```
+
+`private-approved` не означає, що будь-яку інформацію можна зберігати в закритому репозиторії. Закритий remote сам собою не є дозволом на оброблення персональних даних, інформації з обмеженим доступом, адвокатської таємниці, матеріалів розслідування або державної таємниці.
+
+---
+
+## Перевірюваний юридичний документ
+
+Одна з центральних дослідницьких функцій проєкту — підготовка документа, у якому суттєвий висновок пов’язаний із точним підтвердним фрагментом джерела.
+
+Спрощений ланцюжок:
+
+```text
+вихідний документ
+→ адресований фрагмент
+→ доказова одиниця
+→ юридична теза
+→ внутрішнє посилання
+→ додаток із джерелами
+→ автоматична перевірка
+→ ручний юридичний аудит
+```
+
+Підтримуються:
+
+- стабільні ідентифікатори тез і доказів;
+- точні локатори;
+- посилання з основного тексту до додатка;
+- зворотні посилання;
+- SHA-256 джерел і фрагментів;
+- HTML і DOCX;
+- validation reports;
+- виявлення відсутніх доказів, broken anchors і hash mismatch.
+
+Технічно справне посилання не доводить, що джерело:
+
+- має необхідну юридичну силу;
+- актуальне на потрібну дату;
+- застосовне до ситуації, яку розглядають;
+- правильно інтерпретоване;
+- охоплює всю суттєву практику.
+
+Тому автоматична перевірка доповнює, але не замінює професійного юридичного аналізу.
+
+---
+
+## Обмеження та безпека
+
+### На поточному етапі дозволені
+
+- синтетичні нормативні акти та справи;
+- публічні нормативні акти;
+- спеціально підготовлені навчальні матеріали;
+- знеособлені fixtures;
+- публічна статистика без персональних даних;
+- тестові юридичні документи, які не використовують як офіційну позицію.
+
+### Без окремого організаційного рішення заборонені
+
+- реальні матеріали справ;
+- персональні дані;
+- службове листування;
+- адвокатська та професійна таємниця;
+- матеріали слідства;
+- закриті реєстри;
+- секрети, API keys і токени;
+- державна таємниця;
+- інформація з обмеженим доступом;
+- документи, публікація або зовнішнє оброблення яких заборонені законом чи внутрішнім регламентом.
+
+Документи, вебсторінки, issues, коментарі, архіви та модельний вивід вважаються **недовіреними даними**, а не інструкціями агенту. Не виконуйте команди, знайдені всередині джерел.
+
+Докладні правила:
+
+- [`SECURITY.md`](SECURITY.md)
+- [`docs/PUBLIC_REPOSITORY_MODEL.md`](docs/PUBLIC_REPOSITORY_MODEL.md)
+- [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md)
+
+Уразливості, витоки й проблеми із секретами не можна публікувати у відкритому issue. Використовуйте порядок із [`SECURITY.md`](SECURITY.md).
+
+---
+
+# Розроблення репозиторію
+
+Цей розділ призначений для розробників, авторів skills, дослідників і reviewers.
+
+## Клонування upstream
 
 ```bash
 git clone https://github.com/sergeionlyart/minius_codex_lab.git
 cd minius_codex_lab
+
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install "ruff>=0.11,<1" "pytest>=8,<10"
-python -m pip install -r workspace-template/requirements.txt
-python3 scripts/validate_workspace.py --mode upstream
-python3 scripts/check_repo_safety.py --profile upstream-public
-python3 -m unittest discover -s tests -v
-python3 -m unittest discover -s tools/verifiable_document/tests -v
+
+python -m pip install \
+  "PyYAML>=6.0.2,<7" \
+  "ruff>=0.11,<1" \
+  "pytest>=8,<10"
+
+python -m pip install \
+  -r workspace-template/requirements.txt
+
+python -m pip install \
+  -r tools/verifiable_document/requirements.txt
 ```
 
-The public repository owner and URL were verified before publication. See
-`docs/DEVELOPMENT.md` for all gates.
+## Основні quality gates
 
-## What is included
+```bash
+ruff check .
+ruff format --check .
 
-- canonical skills in `.agents/skills/`;
-- specialized roles in `.codex/agents/`;
-- a sanitized runtime template in `workspace-template/`;
-- deterministic verifiable-document tooling in `tools/`;
-- public-safety, validation, and reproducible release tooling in `scripts/`;
-- tests, CI, security documentation, and open-source governance.
+python scripts/validate_workspace.py --mode upstream
 
-The release builder assembles an allowlisted workspace. The maintainer
-`AGENTS.md`, GitHub metadata, tests, bootstrap inputs, Git history, caches,
-real matters, session memory, logs, and generated artifacts are not release
-payload.
+python scripts/check_repo_safety.py \
+  --profile upstream-public
 
-## Security and privacy limits
+python -m unittest discover \
+  -s tests \
+  -v
 
-The public upstream may contain code, templates, schemas, documentation, and
-explicitly synthetic fixtures only. Never submit real:
+python -m unittest discover \
+  -s tools/verifiable_document/tests \
+  -v
 
-- matters, party names, case numbers, source documents, or legal drafts;
-- user/session memory, handoffs, raw or curated operational logs;
-- generated reports, artifacts, exports, or research results;
-- credentials, tokens, local configuration, personal data, or restricted data.
+python -m pytest
+```
 
-`.gitignore` is only a first line of defense. The staged/tracked-content
-scanner is a required gate. See `SECURITY.md`,
-`docs/PUBLIC_REPOSITORY_MODEL.md`, and `docs/THREAT_MODEL.md`.
+Повний процес розроблення описано в [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
-## Compatibility
+## Правило зміни проєкту
 
-Python 3.11 is the documented runtime. Linux, macOS and Windows lifecycle gates
-and the recorded Codex smoke-test scope are listed in `docs/COMPATIBILITY.md`;
-interactive project/hook trust and Word visual QA remain explicit human gates.
+- повторювана юридична процедура оформлюється як skill;
+- вузька незалежна спеціалізація — як role;
+- постійне універсальне правило — у відповідному `AGENTS.md`;
+- детермінована перевірка — як script, schema або test;
+- значуще архітектурне рішення — як ADR або RFC;
+- виправлення поведінкового дефекту починається з відтворювального тесту або synthetic fixture;
+- зміни публічного контракту відображаються в документації та `CHANGELOG.md`.
 
-## Reporting and contributing
+---
 
-Use the issue forms for reproducible bugs, feature requests, and skill
-proposals. Never include real legal or personal data in an issue. Report
-security vulnerabilities privately as described in `SECURITY.md`.
+## Зворотний зв’язок і внесок у проєкт
 
-Contributions are accepted under Apache License 2.0. By submitting a
-contribution, you agree that it may be distributed under the project license.
-See `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SUPPORT.md`.
+Проєкт дослідницький і розрахований на широке коло професійних і технічних експериментів.
 
-## Documentation
+Особливо корисні:
 
-- `ARCHITECTURE.md` — upstream/runtime boundary and build model.
-- `docs/DEVELOPMENT.md` — setup and quality gates.
-- `docs/RELEASING.md` — verified release process.
-- `docs/PUBLIC_REPOSITORY_MODEL.md` — allowed and prohibited data.
-- `docs/COMPATIBILITY.md` — supported and unverified environments.
-- `docs/THREAT_MODEL.md` — security assumptions and residual risks.
-- `docs/PROVENANCE.md` — origin and migration record.
-- `GOVERNANCE.md` and `ROADMAP.md` — decision process and planned work.
+- відтворювані звіти про помилки;
+- результати встановлення на різних ОС і версіях Codex;
+- зауваження юристів до логіки skills і ролей;
+- приклади завдань, які робоче середовище розв’язує погано;
+- пропозиції щодо нових юридичних спеціалізацій;
+- тестові сценарії на синтетичних даних;
+- поліпшення формату перевірюваних документів;
+- зауваження фахівців з інформаційної безпеки;
+- пропозиції університетів, дослідників і команд цифрової трансформації;
+- результати порівняльних тестів моделей.
+
+> Я буду радий критичним зауваженням, пропозиціям та участі в дослідженні. Мета репозиторію — не довести заздалегідь обрану ідею, а перевірити, за яких умов персональне агентне робоче місце справді підвищує якість, швидкість і перевірюваність юридичної роботи.
+
+Як запропонувати зміну:
+
+1. Вивчіть [`CONTRIBUTING.md`](CONTRIBUTING.md) і [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+2. Перевірте наявні [Issues](https://github.com/sergeionlyart/minius_codex_lab/issues).
+3. Створіть focused issue з описом користувацької проблеми.
+4. Використовуйте лише синтетичні та знеособлені приклади.
+5. Для нового skill зазначте:
+   - job-to-be-done;
+   - користувача;
+   - trigger і non-trigger;
+   - входи й виходи;
+   - вимоги до доказів;
+   - обмеження безпеки;
+   - stop conditions;
+   - критерій приймання;
+   - відтворюваний тест.
+6. Для суттєвої зміни архітектури спочатку запропонуйте RFC або ADR.
+7. Надішліть pull request із тестами й результатами quality gates.
+
+Ніколи не додавайте до issue або pull request реальні матеріали справ, відомості про сторони, внутрішні логи, персональні дані, секрети чи інформацію з обмеженим доступом.
+
+---
+
+## Дорожня карта
+
+Поточні напрями досліджень:
+
+- стабілізація бета-версії та збирання незалежних compatibility reports;
+- розширення синтетичного корпусу юридичних тестів;
+- оцінювання якості skills і ролей;
+- формалізація стандарту перевірюваного робочого пакета;
+- безпечне оновлення вже створених workspace;
+- нові юридичні спеціалізації;
+- аудит української термінології;
+- розширення threat model;
+- дослідження переносності конфігурацій між агентними середовищами;
+- необов’язкова локальна пам’ять, сумісна з Obsidian;
+- метрики покриття джерелами й необґрунтованих висновків;
+- навчання користувачів і менторів.
+
+Актуальний план: [`ROADMAP.md`](ROADMAP.md).
+
+---
+
+## Ліцензія
+
+Проєкт поширюється за ліцензією [Apache License 2.0](LICENSE).
+
+Ліцензія дозволяє використання, зміну й поширення проєкту за умови дотримання її положень. Вона не надає гарантій юридичної коректності, придатності для конкретної мети або відповідності внутрішнім вимогам організації.
+
+---
+
+## Автор і походження концепції
+
+Автор концепції **Legal Copilot Ukraine** та ініціатор дослідження:
+
+**Сергій Авдєйчик / Sergej Avdejcik**<br>
+Проєкт **VeriLex**
+
+- Сайт концепції: [legal-copilot-ukraine.vercel.app/uk](https://legal-copilot-ukraine.vercel.app/uk)
+- GitHub: [sergeionlyart](https://github.com/sergeionlyart)
+- Репозиторій: [minius_codex_lab](https://github.com/sergeionlyart/minius_codex_lab)
+
+---
+
+## Коротке резюме
+
+`minius_codex_lab` — це не готовий державний Legal AI-продукт і не заміна юристу.
+
+Це відкрита дослідницька лабораторія, у якій перевіряється, чи можна створити:
+
+- персональне агентне робоче місце юриста;
+- з відкритих і переносних компонентів;
+- адаптоване до реальних функціональних процесів;
+- з операційною пам’яттю;
+- з модульними skills і ролями;
+- з перевірюваним доказовим ланцюжком;
+- з безпечним розділенням даних;
+- з обов’язковим контролем людини;
+- з розвитком через професійну спільноту.
+
+Перший крок — не масштабування на всю систему, а якісне тестування одного робочого місця на відтворюваних завданнях.
