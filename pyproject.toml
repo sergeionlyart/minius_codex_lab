@@ -1,0 +1,24 @@
+[project]
+name = "minius_codex_lab"
+version = "1.0.0-beta.1"
+description = "Open-source Codex workspace for evidence-grounded legal work"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = [
+  "PyYAML>=6.0.2,<7",
+  "pytest>=8,<9",
+  "ruff>=0.11,<1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".bootstrap", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "tools/verifiable_document/tests"]
+addopts = "-q --strict-markers"

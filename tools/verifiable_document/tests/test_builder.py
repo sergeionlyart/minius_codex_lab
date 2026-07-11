@@ -1,0 +1,88 @@
+from __future__ import annotations
+
+import copy
+import importlib.util
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+TOOL_DIR = Path(__file__).resolve().parents[1]
+if str(TOOL_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOL_DIR))
+
+from build import (  # noqa: E402
+    build_docx,
+    build_html,
+    validate_docx_links,
+    validate_html_links,
+)
+from common import load_json  # noqa: E402
+from validate import validate_spec  # noqa: E402
+
+
+class VerifiableDocumentTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.spec_path = TOOL_DIR / "examples" / "spec.example.json"
+        cls.spec = load_json(cls.spec_path)
+
+    def test_example_spec_is_valid(self) -> None:
+        report = validate_spec(self.spec, self.spec_path)
+        self.assertTrue(report["valid"], report["findings"])
+        self.assertEqual(report["summary"]["errors"], 0)
+        self.assertEqual(report["summary"]["warnings"], 0)
+
+    def test_html_contains_resolvable_internal_links(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "example.html"
+            build_html(self.spec, output)
+            self.assertEqual(validate_html_links(output), [])
+            text = output.read_text(encoding="utf-8")
+            self.assertIn("CLM-EX-001", text)
+            self.assertIn("SRC-EXAMPLE-001-U0001", text)
+            self.assertIn("data-unit-id", text)
+
+    @unittest.skipUnless(importlib.util.find_spec("docx"), "python-docx is not installed")
+    def test_docx_contains_resolvable_internal_links(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "example.docx"
+            build_docx(self.spec, output)
+            self.assertTrue(output.is_file())
+            self.assertEqual(validate_docx_links(output), [])
+
+    def test_tampered_unit_hash_is_rejected(self) -> None:
+        spec = copy.deepcopy(self.spec)
+        spec["sources"][0]["units"][0]["text"] += " tampered"
+        report = validate_spec(spec, self.spec_path)
+        codes = {finding["code"] for finding in report["findings"]}
+        self.assertFalse(report["valid"])
+        self.assertIn("unit_hash_mismatch", codes)
+
+    def test_material_claim_without_evidence_is_rejected(self) -> None:
+        spec = copy.deepcopy(self.spec)
+        spec["sections"][0]["blocks"][1]["evidence_refs"] = []
+        report = validate_spec(spec, self.spec_path)
+        codes = {finding["code"] for finding in report["findings"]}
+        self.assertFalse(report["valid"])
+        self.assertIn("material_claim_without_evidence", codes)
+
+    def test_unresolved_evidence_reference_is_rejected(self) -> None:
+        spec = copy.deepcopy(self.spec)
+        spec["sections"][0]["blocks"][1]["evidence_refs"] = ["MISSING-U0001"]
+        report = validate_spec(spec, self.spec_path)
+        codes = {finding["code"] for finding in report["findings"]}
+        self.assertFalse(report["valid"])
+        self.assertIn("unresolved_evidence_ref", codes)
+
+    def test_example_source_file_hash_is_bound(self) -> None:
+        source = self.spec["sources"][0]
+        self.assertEqual(source["local_path"], "source.example.txt")
+        report = validate_spec(json.loads(json.dumps(self.spec)), self.spec_path)
+        codes = {finding["code"] for finding in report["findings"]}
+        self.assertNotIn("source_hash_mismatch", codes)
+
+
+if __name__ == "__main__":
+    unittest.main()

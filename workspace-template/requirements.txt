@@ -1,0 +1,2 @@
+# Runtime validation dependency for memory/index.yaml and future YAML configuration.
+PyYAML>=6.0.2,<7

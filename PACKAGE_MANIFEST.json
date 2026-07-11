@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "project": "minius_codex_lab",
+  "package": "minius_codex_lab-workspace",
+  "version": "1.0.0-beta.1",
+  "layout": "workspace-template-overlay",
+  "default_source_date_epoch": 1783771200,
+  "release_asset": "minius_codex_lab-workspace-v1.0.0-beta.1.zip",
+  "payload_mappings": [
+    {
+      "source": "workspace-template",
+      "target": ""
+    },
+    {
+      "source": ".agents/skills",
+      "target": ".agents/skills"
+    },
+    {
+      "source": ".codex/agents",
+      "target": ".codex/agents"
+    },
+    {
+      "source": "tools/verifiable_document",
+      "target": "tools/verifiable_document"
+    },
+    {
+      "source": "scripts/check_repo_safety.py",
+      "target": "scripts/check_repo_safety.py"
+    },
+    {
+      "source": "scripts/validate_workspace.py",
+      "target": "scripts/validate_workspace.py"
+    },
+    {
+      "source": "LICENSE",
+      "target": "LICENSE"
+    }
+  ]
+}

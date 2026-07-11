@@ -1,0 +1,67 @@
+{
+  "source_id": "SRC-EXAMPLE-001",
+  "title": "Навчальне джерело для тестування (не нормативний акт)",
+  "authority": "Розробники тестового середовища",
+  "identifier": "EXAMPLE-ONLY",
+  "type": "synthetic-test-document",
+  "jurisdiction": "Not applicable",
+  "date": "2026-07-11",
+  "version_date": "2026-07-11",
+  "as_of": "2026-07-11",
+  "effective_from": "",
+  "effective_to": null,
+  "retrieved_at": "2026-07-11T00:00:00Z",
+  "official_url": "",
+  "local_path": "source.example.txt",
+  "sha256": "479358523e8c0ccfa97499eac86f99a3418849551dd6d0d2df9a6e0b9e8ef8f4",
+  "inclusion_mode": "full",
+  "reliability": "synthetic-fixture",
+  "limitations": "Лише технічний приклад; не використовувати як джерело права.",
+  "units": [
+    {
+      "unit_id": "SRC-EXAMPLE-001-U0001",
+      "locator": "paragraph 1, sentence 1",
+      "text": "Це навчальне джерело створено виключно для перевірки технічного конвеєра і не є нормативно-правовим актом.",
+      "sha256": "81f592cc31f25d4d6d32b86b9bc200b96407db7da5876f5e263cf279ec9f8cc8",
+      "verification_status": "human-verified",
+      "context_before": "",
+      "context_after": "У навчальному прикладі відповідальний орган оприлюднює звіт не пізніше десяти робочих днів після завершення перевірки."
+    },
+    {
+      "unit_id": "SRC-EXAMPLE-001-U0002",
+      "locator": "paragraph 2, sentence 1",
+      "text": "У навчальному прикладі відповідальний орган оприлюднює звіт не пізніше десяти робочих днів після завершення перевірки.",
+      "sha256": "7e83e3ee35cd9dd3ef1d4ceca5e445ebabc9fa4a43e1ef4d4c5fa7f1ca55a134",
+      "verification_status": "human-verified",
+      "context_before": "Це навчальне джерело створено виключно для перевірки технічного конвеєра і не є нормативно-правовим актом.",
+      "context_after": "Звіт повинен містити перелік використаних джерел і дату, станом на яку перевірено інформацію."
+    },
+    {
+      "unit_id": "SRC-EXAMPLE-001-U0003",
+      "locator": "paragraph 2, sentence 2",
+      "text": "Звіт повинен містити перелік використаних джерел і дату, станом на яку перевірено інформацію.",
+      "sha256": "c92fa961ebfb39c88863fc20926dbfa44dd7d0d3008601dddc55f6be0a4fdfa2",
+      "verification_status": "human-verified",
+      "context_before": "У навчальному прикладі відповідальний орган оприлюднює звіт не пізніше десяти робочих днів після завершення перевірки.",
+      "context_after": "Висновок не вважається підтвердженим, якщо в ньому немає посилання на точний фрагмент джерела."
+    },
+    {
+      "unit_id": "SRC-EXAMPLE-001-U0004",
+      "locator": "paragraph 3, sentence 1",
+      "text": "Висновок не вважається підтвердженим, якщо в ньому немає посилання на точний фрагмент джерела.",
+      "sha256": "55a8dd10fb56adc663c6c7e35e6972696937775079f3cb04833b65712f15a115",
+      "verification_status": "human-verified",
+      "context_before": "Звіт повинен містити перелік використаних джерел і дату, станом на яку перевірено інформацію.",
+      "context_after": "Наявність технічно справного посилання сама по собі не доводить правильність юридичного тлумачення."
+    },
+    {
+      "unit_id": "SRC-EXAMPLE-001-U0005",
+      "locator": "paragraph 3, sentence 2",
+      "text": "Наявність технічно справного посилання сама по собі не доводить правильність юридичного тлумачення.",
+      "sha256": "2a67a4042136f9b4a10f286fa2ebda176f96be8b24085ba5e0f316e94b502828",
+      "verification_status": "human-verified",
+      "context_before": "Висновок не вважається підтвердженим, якщо в ньому немає посилання на точний фрагмент джерела.",
+      "context_after": ""
+    }
+  ]
+}

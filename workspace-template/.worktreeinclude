@@ -1,0 +1,5 @@
+# Codex managed worktrees already contain tracked files.
+# Add only deliberately ignored, non-secret local setup files that every worktree needs.
+# NEVER add .env, tokens, private keys, restricted/, personal-data/ or vault/ here.
+# Example after organizational approval:
+# .local/nonsecret-tool-config.json

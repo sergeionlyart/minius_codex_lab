@@ -1,0 +1,21 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "indexed"
+project_doc_max_bytes = 65536
+project_root_markers = [".git"]
+
+[sandbox_workspace_write]
+network_access = false
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+
+[features]
+multi_agent = true
+memories = false
+
+[agents]
+max_threads = 6
+max_depth = 1
+interrupt_message = true

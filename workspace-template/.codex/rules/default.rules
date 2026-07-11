@@ -1,0 +1,100 @@
+# Project-local exec policy. Rules affect commands that request execution outside the sandbox.
+# Test with: codex execpolicy check --pretty --rules .codex/rules/default.rules -- <command>
+
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "Force-push can destroy shared legal audit history. Create a new corrective commit or obtain an approved administrative procedure.",
+    match = ["git push --force origin main"],
+)
+
+prefix_rule(
+    pattern = ["git", "push", "-f"],
+    decision = "forbidden",
+    justification = "Force-push is forbidden; preserve the repository audit trail.",
+    match = ["git push -f origin main"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Hard reset can erase uncommitted evidence. Use a new branch, stash only with user approval, or restore a specific file after review.",
+    match = ["git reset --hard HEAD~1"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean", ["-fd", "-df", "-fdx", "-xdf"]],
+    decision = "forbidden",
+    justification = "Bulk clean can remove untracked source evidence. Review files individually instead.",
+    match = ["git clean -fd", "git clean -fdx"],
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "External publication requires a classification check, remote verification, and user approval.",
+    match = ["git push", "git push origin main", "git push -u origin session/20260711-review"],
+)
+
+prefix_rule(
+    pattern = ["git", "remote", ["add", "set-url", "remove", "rename"]],
+    decision = "prompt",
+    justification = "Changing remotes affects external data flow and must be explicit.",
+    match = ["git remote add origin git@github.com:org/repo.git", "git remote set-url origin https://example.invalid/repo.git"],
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", ["create", "delete", "archive", "rename"]],
+    decision = "prompt",
+    justification = "Repository lifecycle actions are external side effects and require review.",
+    match = ["gh repo create demo --public", "gh repo delete org/demo"],
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", ["create", "merge", "close"]],
+    decision = "prompt",
+    justification = "Publishing or merging a change requires explicit review.",
+    match = ["gh pr create --fill", "gh pr merge 12"],
+)
+
+prefix_rule(
+    pattern = ["git", ["merge", "rebase", "cherry-pick"]],
+    decision = "prompt",
+    justification = "History-combining operations can create evidence conflicts and must be reviewed.",
+    match = ["git merge session/20260711-review", "git rebase main", "git cherry-pick deadbeef"],
+)
+
+prefix_rule(
+    pattern = ["git", "branch", "-D"],
+    decision = "prompt",
+    justification = "Deleting an unmerged branch may discard research history.",
+    match = ["git branch -D session/20260711-review"],
+)
+
+prefix_rule(
+    pattern = ["git", ["restore", "checkout"]],
+    decision = "prompt",
+    justification = "Restoring files can discard local legal work; inspect the diff first.",
+    match = ["git restore matters/2026-001/drafts/memo.md", "git checkout -- AGENTS.md"],
+)
+
+prefix_rule(
+    pattern = [["curl", "wget", "scp", "sftp", "rsync"]],
+    decision = "prompt",
+    justification = "Network transfer may disclose confidential material. Minimize data and obtain approval.",
+    match = ["curl https://example.com", "wget https://example.com/file", "scp report.pdf host:/tmp/"],
+)
+
+prefix_rule(
+    pattern = ["rm", "-rf", "/"],
+    decision = "forbidden",
+    justification = "Destructive filesystem command is forbidden.",
+    match = ["rm -rf /"],
+)
+
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr"]],
+    decision = "prompt",
+    justification = "Recursive deletion requires path-by-path review.",
+    match = ["rm -rf build", "rm -fr .setup-staging"],
+)

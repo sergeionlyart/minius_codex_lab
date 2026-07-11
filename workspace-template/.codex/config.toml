@@ -1,0 +1,24 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Safe interactive defaults. Do not pin a model: use the current organization-approved model.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "indexed"
+project_doc_max_bytes = 32768
+project_root_markers = [".git"]
+
+[sandbox_workspace_write]
+network_access = false
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = true
+
+[features]
+hooks = true
+multi_agent = true
+# Stage 1 uses transparent repository memory. Opaque cross-project model memory is disabled.
+memories = false
+
+[agents]
+max_threads = 6
+max_depth = 1
+interrupt_message = true

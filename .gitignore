@@ -1,0 +1,118 @@
+# Bootstrap inputs and local migration state
+/.bootstrap/
+/CODEX_MAINTAINER_BOOTSTRAP_MINIUS_CODEX_LAB_RU.md
+/CODEX_MAINTAINER_BOOTSTRAP_MINIUS_CODEX_LAB_RU.md.sha256
+/CODEX_SETUP_PROMPT_RU.md
+/minjust_codex_legal_workspace_v1.0.0.zip
+
+# Generated distribution artifacts
+/dist/
+/build/
+*.zip
+*.zip.sha256
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# Secrets, credentials, keys, and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.kdbx
+credentials*.json
+secrets*.json
+auth.json
+.codex/auth.json
+.codex/local/
+.codex/logs/
+.codex/tmp/
+.codex/sessions/
+.codex/history.jsonl
+history.jsonl
+
+# Prohibited/local data classifications
+restricted/
+personal-data/
+personal_data/
+state-secret/
+state_secret/
+vault/
+dsk/
+
+# Runtime data accidentally created at the public repository root
+/matters/*
+!/matters/_template/
+!/matters/_template/**
+/memory/
+/logs/
+/artifacts/
+/outputs/
+/exports/
+
+# Keep only the sanitized matter template inside the release source
+/workspace-template/matters/*
+!/workspace-template/matters/AGENTS.md
+!/workspace-template/matters/README.md
+!/workspace-template/matters/_template/
+!/workspace-template/matters/_template/**
+
+# Runtime-generated state inside workspace-template is local only
+/workspace-template/memory/sessions/*
+!/workspace-template/memory/sessions/.gitkeep
+/workspace-template/logs/raw/*
+!/workspace-template/logs/raw/.gitkeep
+!/workspace-template/logs/raw/README.md
+/workspace-template/logs/curated/*
+!/workspace-template/logs/curated/.gitkeep
+!/workspace-template/logs/curated/README.md
+/workspace-template/artifacts/*
+!/workspace-template/artifacts/.gitkeep
+!/workspace-template/artifacts/README.md
+
+# Python, test, and tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.venv/
+venv/
+
+# Temporary/generated files
+.tmp/
+tmp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
+*.log
+
+# Office/PDF lock, recovery, and temporary files
+~$*.docx
+~$*.xlsx
+~$*.pptx
+*.autosave.docx
+*.autosave.xlsx
+*.autosave.pptx
+*.tmp.pdf
+
+# IDE and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.local.json

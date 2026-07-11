@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/session_start_memory.py\"",
+            "commandWindows": "powershell -NoProfile -Command \"$r=(git rev-parse --show-toplevel); & py -3 (Join-Path $r '.codex/hooks/session_start_memory.py')\"",
+            "timeout": 10,
+            "statusMessage": "Loading repository operational memory"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/stop_git_guard.py\"",
+            "commandWindows": "powershell -NoProfile -Command \"$r=(git rev-parse --show-toplevel); & py -3 (Join-Path $r '.codex/hooks/stop_git_guard.py')\"",
+            "timeout": 10,
+            "statusMessage": "Checking Git handoff state"
+          }
+        ]
+      }
+    ]
+  }
+}

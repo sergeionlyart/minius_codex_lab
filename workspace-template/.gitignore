@@ -1,0 +1,100 @@
+# BEGIN MINIUS CODEX WORKSPACE
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials*.json
+secrets*.json
+auth.json
+.codex/auth.json
+
+# Restricted local data classes
+restricted/
+personal-data/
+personal_data/
+vault/
+state-secret/
+state_secret/
+dsk/
+
+# Real matters are local by default; only the empty template is distributable
+matters/*
+!matters/AGENTS.md
+!matters/README.md
+!matters/_template/
+!matters/_template/**
+
+# Mutable operational memory and handoffs
+memory/CURRENT.md
+memory/DECISIONS.md
+memory/OPEN_QUESTIONS.md
+memory/index.yaml
+memory/sessions/*
+!memory/sessions/.gitkeep
+
+# Runtime logs and generated outputs
+logs/raw/*
+!logs/raw/.gitkeep
+!logs/raw/README.md
+logs/curated/*
+!logs/curated/README.md
+artifacts/*
+!artifacts/README.md
+**/outputs/*
+!matters/_template/outputs/.gitkeep
+*.log
+
+# Codex local state
+.codex/logs/
+.codex/tmp/
+.codex/sessions/
+.codex/history.jsonl
+history.jsonl
+
+# Local setup/build artifacts and archives
+.bootstrap/
+.setup-staging/
+.setup-backup/
+build/
+dist/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# Python and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Temporary Office/PDF/editor files
+~$*.docx
+~$*.xlsx
+~$*.pptx
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+.vscode/settings.local.json
+.idea/
+
+# BEGIN USER-LOCAL OPTIONAL
+# Add organization-approved local exclusions below this line.
+# END USER-LOCAL OPTIONAL
+
+# END MINIUS CODEX WORKSPACE

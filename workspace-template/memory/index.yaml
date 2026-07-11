@@ -1,0 +1,15 @@
+schema_version: 1
+workspace_version: 1.0.0-beta.1
+updated_at_utc: null
+active_matter: null
+active_sessions: []
+last_verified_legal_date: null
+last_verified_data_date: null
+remote:
+  name: origin
+  visibility_verified: false
+  url: null
+open_blockers:
+  - OQ-001
+  - OQ-002
+  - OQ-003

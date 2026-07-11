@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/minius_codex_lab/verifiable-legal-document.schema.json",
+  "title": "Verifiable legal document specification",
+  "type": "object",
+  "required": ["schema_version", "document", "sections", "sources"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "document": {
+      "type": "object",
+      "required": ["document_id", "title", "language", "as_of", "classification"],
+      "properties": {
+        "document_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "language": {"type": "string", "minLength": 2},
+        "as_of": {"type": "string", "format": "date"},
+        "classification": {
+          "enum": ["PUBLIC", "INTERNAL", "PERSONAL", "RESTRICTED"]
+        },
+        "status": {"type": "string"},
+        "prepared_by": {"type": "string"},
+        "review_status": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section_id", "title", "blocks"],
+        "properties": {
+          "section_id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "blocks": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["type", "block_id", "text"],
+                  "properties": {
+                    "type": {"enum": ["paragraph", "heading"]},
+                    "block_id": {"type": "string"},
+                    "text": {"type": "string"},
+                    "level": {"type": "integer", "minimum": 2, "maximum": 4}
+                  },
+                  "additionalProperties": true
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "block_id",
+                    "claim_id",
+                    "claim_type",
+                    "text",
+                    "material",
+                    "evidence_refs",
+                    "counterevidence_refs",
+                    "confidence"
+                  ],
+                  "properties": {
+                    "type": {"const": "claim"},
+                    "block_id": {"type": "string"},
+                    "claim_id": {"type": "string"},
+                    "claim_type": {
+                      "enum": [
+                        "fact",
+                        "legal_proposition",
+                        "numeric",
+                        "quotation",
+                        "interpretation",
+                        "assumption",
+                        "recommendation"
+                      ]
+                    },
+                    "text": {"type": "string", "minLength": 1},
+                    "material": {"type": "boolean"},
+                    "evidence_refs": {
+                      "type": "array",
+                      "items": {"type": "string"},
+                      "uniqueItems": true
+                    },
+                    "counterevidence_refs": {
+                      "type": "array",
+                      "items": {"type": "string"},
+                      "uniqueItems": true
+                    },
+                    "confidence": {"enum": ["high", "medium", "low", "not_assessed"]},
+                    "qualification": {"type": "string"},
+                    "analysis_note": {"type": "string"}
+                  },
+                  "additionalProperties": true
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "title",
+          "authority",
+          "type",
+          "jurisdiction",
+          "retrieved_at",
+          "sha256",
+          "inclusion_mode",
+          "units"
+        ],
+        "properties": {
+          "source_id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "authority": {"type": "string", "minLength": 1},
+          "type": {"type": "string", "minLength": 1},
+          "jurisdiction": {"type": "string", "minLength": 1},
+          "identifier": {"type": "string"},
+          "date": {"type": "string"},
+          "version_date": {"type": "string"},
+          "as_of": {"type": "string"},
+          "effective_from": {"type": "string"},
+          "effective_to": {"type": ["string", "null"]},
+          "retrieved_at": {"type": "string"},
+          "official_url": {"type": "string"},
+          "local_path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "inclusion_mode": {
+            "enum": ["full", "evidence-pack", "page-image-evidence"]
+          },
+          "reliability": {"type": "string"},
+          "limitations": {"type": "string"},
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "unit_id",
+                "locator",
+                "text",
+                "sha256",
+                "verification_status"
+              ],
+              "properties": {
+                "unit_id": {"type": "string", "minLength": 1},
+                "locator": {"type": "string", "minLength": 1},
+                "text": {"type": "string", "minLength": 1},
+                "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "verification_status": {
+                  "enum": [
+                    "human-verified",
+                    "machine-extracted",
+                    "needs-human-verification",
+                    "not-applicable"
+                  ]
+                },
+                "context_before": {"type": "string"},
+                "context_after": {"type": "string"},
+                "page": {"type": ["integer", "string"]},
+                "region": {"type": "string"}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
