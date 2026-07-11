@@ -41,8 +41,10 @@ the final operational authority for publication.
 ## Ownership
 
 Every shared output has one explicit writer. Review and audit roles provide
-findings rather than concurrently editing the final text. CODEOWNERS is omitted
-until the public repository is created and its owner metadata is verified.
+findings rather than concurrently editing the final text. Repository ownership
+was verified as `sergeionlyart/minius_codex_lab`; `.github/CODEOWNERS` routes
+changes to `@sergeionlyart` without requiring external approval from a solo
+maintainer.
 
 ## Versioning
 

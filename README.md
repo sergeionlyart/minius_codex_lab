@@ -64,7 +64,7 @@ personal, restricted, privileged, or otherwise protected information.
 Clone the repository only to develop and review the distribution:
 
 ```bash
-git clone <verified-public-repository-url>
+git clone https://github.com/sergeionlyart/minius_codex_lab.git
 cd minius_codex_lab
 python3.11 -m venv .venv
 source .venv/bin/activate
@@ -76,8 +76,8 @@ python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s tools/verifiable_document/tests -v
 ```
 
-The placeholder URL is intentional until the public repository owner and URL
-are verified. See `docs/DEVELOPMENT.md` for all gates.
+The public repository owner and URL were verified before publication. See
+`docs/DEVELOPMENT.md` for all gates.
 
 ## What is included
 
