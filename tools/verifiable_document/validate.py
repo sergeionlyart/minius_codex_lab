@@ -8,7 +8,7 @@ from collections import Counter
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlparse
 
@@ -75,6 +75,14 @@ def _duplicate_values(values: Iterable[str]) -> list[str]:
 def _looks_like_url(value: str) -> bool:
     parsed = urlparse(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _is_absolute_path_on_any_platform(value: str) -> bool:
+    return (
+        Path(value).is_absolute()
+        or PurePosixPath(value).is_absolute()
+        or PureWindowsPath(value).is_absolute()
+    )
 
 
 def _optional_jsonschema_check(spec: dict[str, Any], findings: list[Finding]) -> None:
@@ -292,7 +300,7 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
                     "Expected a string.",
                 )
             else:
-                if Path(local_path).is_absolute():
+                if _is_absolute_path_on_any_platform(local_path):
                     _add(
                         findings,
                         "error",

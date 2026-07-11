@@ -313,7 +313,12 @@ class WorkspaceLifecycleTests(unittest.TestCase):
         )
         logs = list((worktree / "memory/sessions").glob("*--case-law.md"))
         self.assertEqual(len(logs), 1)
-        self.assertIn(str(worktree), logs[0].read_text(encoding="utf-8"))
+        worktree_line = next(
+            line.removeprefix("- **Worktree:**").strip()
+            for line in logs[0].read_text(encoding="utf-8").splitlines()
+            if line.startswith("- **Worktree:**")
+        )
+        self.assertTrue(Path(worktree_line).samefile(worktree))
 
     def test_finish_session_rejects_arbitrary_workspace_file(self) -> None:
         agents_path = self.root / "AGENTS.md"

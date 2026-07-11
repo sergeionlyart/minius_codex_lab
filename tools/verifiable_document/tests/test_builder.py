@@ -100,12 +100,14 @@ class VerifiableDocumentTests(unittest.TestCase):
             self.assertIn("source_hash_mismatch", codes)
 
     def test_absolute_local_path_is_rejected(self) -> None:
-        spec = copy.deepcopy(self.spec)
-        spec["sources"][0]["local_path"] = "/private/synthetic/source.txt"
-        report = validate_spec(spec, self.spec_path)
-        codes = {finding["code"] for finding in report["findings"]}
-        self.assertFalse(report["valid"])
-        self.assertIn("absolute_local_path", codes)
+        for local_path in ("/private/synthetic/source.txt", r"C:\synthetic\source.txt"):
+            with self.subTest(local_path=local_path):
+                spec = copy.deepcopy(self.spec)
+                spec["sources"][0]["local_path"] = local_path
+                report = validate_spec(spec, self.spec_path)
+                codes = {finding["code"] for finding in report["findings"]}
+                self.assertFalse(report["valid"])
+                self.assertIn("absolute_local_path", codes)
 
     def test_unverified_page_image_evidence_is_rejected(self) -> None:
         spec = copy.deepcopy(self.spec)

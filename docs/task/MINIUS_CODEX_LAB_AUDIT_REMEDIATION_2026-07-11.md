@@ -59,7 +59,7 @@ python3 scripts/build_release.py --check-reproducibility
 
 ```text
 payload_files: 102
-archive_sha256: 17d968f9ff5166020f63d3b6d238385acc9deba9404ad82d054f2e013f02c087
+archive_sha256: 928f0d87f9aeb1242cfe004a7768017ec9397003675895a07859cd6ef522ad65
 reproducibility: PASS
 sbom: SPDX-2.3
 ```
