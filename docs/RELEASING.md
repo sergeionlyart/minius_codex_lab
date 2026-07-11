@@ -9,22 +9,23 @@ gate fails.
 
 ## Version contract
 
-For the first public release, every version-bearing location must use:
+The single canonical machine-readable version source is:
 
-`1.0.0-beta.1`
+`PACKAGE_MANIFEST.json`
 
-The assets are:
+For the current manifest version, the assets are:
 
 ```text
-minius_codex_lab-workspace-v1.0.0-beta.1.zip
-minius_codex_lab-workspace-v1.0.0-beta.1.zip.sha256
+minius_codex_lab-workspace-v1.0.0-beta.2.zip
+minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json
 ```
 
 ## Pre-tag checklist
 
 1. Confirm the working tree and branch are correct.
-2. Confirm the version in README, changelog, build metadata, tests, and release
-   notes.
+2. Confirm derived versions in `pyproject.toml`, README, changelog and release
+   notes; the validator compares them with `PACKAGE_MANIFEST.json`.
 3. Review the release allowlist and all runtime template changes.
 4. Run:
 
@@ -37,8 +38,8 @@ python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s tools/verifiable_document/tests -v
 python3 -m pytest
 export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
-python3 scripts/build_release.py --version 1.0.0-beta.1
-python3 scripts/build_release.py --version 1.0.0-beta.1 --check-reproducibility
+python3 scripts/build_release.py
+python3 scripts/build_release.py --check-reproducibility
 ```
 
 5. Verify the ZIP name, size, SHA-256, manifest, clean extraction, and
@@ -50,13 +51,15 @@ python3 scripts/build_release.py --version 1.0.0-beta.1 --check-reproducibility
 Create an annotated tag only after CI succeeds:
 
 ```bash
-git tag -a v1.0.0-beta.1 -m "Release 1.0.0-beta.1"
-git push origin v1.0.0-beta.1
+version="$(python3 -c 'import json; print(json.load(open("PACKAGE_MANIFEST.json"))["version"])')"
+git tag -a "v$version" -m "Release $version"
+git push origin "v$version"
 ```
 
 The tag-triggered `.github/workflows/release.yml` repeats all gates, rebuilds
-both artifacts from that tag, and creates or updates the single release for the
-tag. It marks suffix versions as pre-releases.
+all assets from that tag, and creates or updates the single release for the
+tag. It marks suffix versions as pre-releases and creates GitHub artifact
+attestations for the ZIP and SPDX SBOM.
 
 Do not run `gh release create` in parallel. The workflow is the publication
 owner.

@@ -22,7 +22,6 @@ from typing import Any
 
 PROJECT_NAME = "minius_codex_lab"
 PACKAGE_NAME = "minius_codex_lab-workspace"
-CURRENT_VERSION = "1.0.0-beta.1"
 PROJECT_MANIFEST = "PACKAGE_MANIFEST.json"
 CHECKSUMS_FILE = "CHECKSUMS.sha256"
 MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024
@@ -53,6 +52,8 @@ WORKSPACE_TEMPLATE_FILES = frozenset(
         "SECURITY.md",
         "artifacts/README.md",
         "docs/GIT_WORKFLOW.md",
+        "docs/CODEX_SMOKE_TEST.md",
+        "docs/INSTALL_WINDOWS_POWERSHELL.md",
         "docs/LEGAL_SOURCE_HIERARCHY.md",
         "docs/LEGAL_WORKFLOW_LEVELS.md",
         "docs/OPENAI_CODEX_ARCHITECTURE_NOTES.md",
@@ -95,7 +96,9 @@ WORKSPACE_TEMPLATE_FILES = frozenset(
         "memory/templates/session.md",
         "requirements.txt",
         "scripts/finish_session.py",
+        "scripts/init_workspace.py",
         "scripts/new_matter.py",
+        "scripts/run_synthetic_e2e.py",
         "scripts/start_session.py",
     }
 )
@@ -132,10 +135,14 @@ ESSENTIAL_FILES = {
     "LICENSE",
     "README.md",
     "requirements.txt",
+    "docs/CODEX_SMOKE_TEST.md",
+    "docs/INSTALL_WINDOWS_POWERSHELL.md",
     "matters/_template/MATTER.md",
     "memory/CURRENT.md",
     "scripts/check_repo_safety.py",
+    "scripts/init_workspace.py",
     "scripts/new_matter.py",
+    "scripts/run_synthetic_e2e.py",
     "scripts/validate_workspace.py",
     "tools/verifiable_document/README.md",
 }
@@ -161,6 +168,7 @@ class BuildResult:
 
     archive: Path
     checksum_file: Path
+    sbom_file: Path
     sha256: str
     file_count: int
     source_date_epoch: int
@@ -588,6 +596,129 @@ def verify_zip_archive(path: Path, expected_version: str | None = None) -> dict[
     return manifest
 
 
+def _spdx_id(value: str) -> str:
+    normalized = re.sub(r"[^A-Za-z0-9.-]+", "-", value).strip("-.")
+    return normalized or "item"
+
+
+def _runtime_dependencies(repo_root: Path) -> list[tuple[str, str]]:
+    path = repo_root / "workspace-template/requirements.txt"
+    dependencies: list[tuple[str, str]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        value = line.split("#", 1)[0].strip()
+        if not value:
+            continue
+        match = re.fullmatch(r"([A-Za-z0-9_.-]+)(.*)", value)
+        if match is None:
+            raise BuildError(f"Unsupported runtime dependency declaration: {value!r}")
+        name, constraint = match.groups()
+        dependencies.append((name, constraint or "NOASSERTION"))
+    return sorted(dependencies, key=lambda item: item[0].casefold())
+
+
+def _write_spdx_sbom(
+    repo_root: Path,
+    archive: Path,
+    manifest: Mapping[str, Any],
+    version: str,
+    epoch: int,
+) -> Path:
+    archive_digest = sha256_file(archive)
+    package_id = f"SPDXRef-Package-{_spdx_id(PACKAGE_NAME)}"
+    records = manifest.get("files")
+    if not isinstance(records, list):
+        raise BuildError("Cannot create SBOM without release manifest files.")
+    files: list[dict[str, Any]] = []
+    relationships: list[dict[str, str]] = []
+    for record in records:
+        if not isinstance(record, dict):
+            raise BuildError("Cannot create SBOM from an invalid file record.")
+        relative = record.get("path")
+        digest = record.get("sha256")
+        if not isinstance(relative, str) or not isinstance(digest, str):
+            raise BuildError("Cannot create SBOM from an incomplete file record.")
+        file_id = f"SPDXRef-File-{_spdx_id(relative)}"
+        files.append(
+            {
+                "SPDXID": file_id,
+                "checksums": [{"algorithm": "SHA256", "checksumValue": digest}],
+                "copyrightText": "NOASSERTION",
+                "fileName": f"./{relative}",
+                "licenseConcluded": "NOASSERTION",
+                "licenseInfoInFiles": ["NOASSERTION"],
+            }
+        )
+        relationships.append(
+            {
+                "spdxElementId": package_id,
+                "relationshipType": "CONTAINS",
+                "relatedSpdxElement": file_id,
+            }
+        )
+    packages: list[dict[str, Any]] = [
+        {
+            "SPDXID": package_id,
+            "checksums": [{"algorithm": "SHA256", "checksumValue": archive_digest}],
+            "copyrightText": "NOASSERTION",
+            "downloadLocation": (
+                f"https://github.com/sergeionlyart/minius_codex_lab/releases/tag/v{version}"
+            ),
+            "filesAnalyzed": True,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": PACKAGE_NAME,
+            "versionInfo": version,
+        }
+    ]
+    for name, constraint in _runtime_dependencies(repo_root):
+        dependency_id = f"SPDXRef-Dependency-{_spdx_id(name)}"
+        packages.append(
+            {
+                "SPDXID": dependency_id,
+                "copyrightText": "NOASSERTION",
+                "downloadLocation": "NOASSERTION",
+                "filesAnalyzed": False,
+                "licenseConcluded": "NOASSERTION",
+                "licenseDeclared": "NOASSERTION",
+                "name": name,
+                "versionInfo": constraint,
+            }
+        )
+        relationships.append(
+            {
+                "spdxElementId": package_id,
+                "relationshipType": "DEPENDS_ON",
+                "relatedSpdxElement": dependency_id,
+            }
+        )
+    created = datetime.fromtimestamp(epoch, UTC).replace(microsecond=0).isoformat()
+    sbom = {
+        "SPDXID": "SPDXRef-DOCUMENT",
+        "creationInfo": {
+            "created": created.replace("+00:00", "Z"),
+            "creators": ["Tool: minius_codex_lab deterministic release builder"],
+        },
+        "dataLicense": "CC0-1.0",
+        "documentDescribes": [package_id],
+        "documentNamespace": (
+            "https://github.com/sergeionlyart/minius_codex_lab/"
+            f"releases/tag/v{version}/sbom/{archive_digest}"
+        ),
+        "files": files,
+        "name": f"{PACKAGE_NAME}-{version}",
+        "packages": packages,
+        "relationships": relationships,
+        "spdxVersion": "SPDX-2.3",
+    }
+    path = archive.with_name(f"{archive.stem}.spdx.json")
+    path.write_text(
+        json.dumps(sbom, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return path
+
+
 def _validate_distribution_path(relative: PurePosixPath) -> None:
     folded_parts = {part.casefold() for part in relative.parts}
     if folded_parts & FORBIDDEN_ARCHIVE_PARTS:
@@ -671,29 +802,58 @@ def _run_runtime_check(root: Path, script_name: str, *args: str) -> None:
 
 def _run_lifecycle_smoke(root: Path) -> None:
     matter_id = "synthetic-build-check"
-    current_path = root / "memory/CURRENT.md"
-    current_before = current_path.read_bytes()
-    completed = subprocess.run(
-        [
-            sys.executable,
-            str(root / "scripts/new_matter.py"),
-            "--id",
-            matter_id,
-            "--title",
-            "Synthetic release build check",
-            "--classification",
-            "PUBLIC",
-            "--no-activate",
-        ],
-        cwd=root,
-        check=False,
-        text=True,
-        capture_output=True,
-        timeout=60,
+    environment = os.environ.copy()
+    environment.update(
+        {
+            "GIT_AUTHOR_NAME": "minius synthetic gate",
+            "GIT_AUTHOR_EMAIL": "synthetic-gate@example.invalid",
+            "GIT_COMMITTER_NAME": "minius synthetic gate",
+            "GIT_COMMITTER_EMAIL": "synthetic-gate@example.invalid",
+        }
     )
-    if completed.returncode != 0:
-        details = completed.stdout.strip() or completed.stderr.strip() or "no diagnostic output"
-        raise BuildError(f"Extracted workspace lifecycle smoke failed: {details}")
+
+    def run(label: str, *args: str) -> str:
+        completed = subprocess.run(
+            args,
+            cwd=root,
+            check=False,
+            text=True,
+            capture_output=True,
+            timeout=120,
+            env=environment,
+        )
+        if completed.returncode != 0:
+            details = completed.stdout.strip() or completed.stderr.strip() or "no output"
+            raise BuildError(f"Extracted workspace {label} failed: {details}")
+        return completed.stdout
+
+    init_args = (
+        sys.executable,
+        str(root / "scripts/init_workspace.py"),
+        "--memory-mode",
+        "local-git",
+    )
+    run("initialization", *init_args)
+    first_commit = run("initial commit lookup", "git", "rev-parse", "HEAD").strip()
+    run("idempotent initialization", *init_args)
+    if run("initial commit recount", "git", "rev-list", "--count", "HEAD").strip() != "1":
+        raise BuildError("Idempotent initialization created an extra commit.")
+    if run("branch verification", "git", "branch", "--show-current").strip() != "main":
+        raise BuildError("Initialization did not create main as the initial branch.")
+    if run("remote verification", "git", "remote").strip():
+        raise BuildError("Initialization unexpectedly created a Git remote.")
+
+    run(
+        "matter creation",
+        sys.executable,
+        str(root / "scripts/new_matter.py"),
+        "--id",
+        matter_id,
+        "--title",
+        "Synthetic release build check",
+        "--classification",
+        "PUBLIC",
+    )
     matter_file = root / "matters" / matter_id / "MATTER.md"
     if not matter_file.is_file():
         raise BuildError("Lifecycle smoke did not create matters/<id>/MATTER.md.")
@@ -706,8 +866,78 @@ def _run_lifecycle_smoke(root: Path) -> None:
         raise BuildError("Lifecycle smoke did not replace required matter placeholders.")
     if "{{MATTER_ID}}" in matter_text or "{{TITLE}}" in matter_text:
         raise BuildError("Lifecycle smoke left required placeholders unresolved.")
-    if current_path.read_bytes() != current_before:
-        raise BuildError("Lifecycle smoke changed memory despite --no-activate.")
+    run("matter staging", "git", "add", "--", f"matters/{matter_id}", "memory")
+    _run_runtime_check(
+        root,
+        "scripts/check_repo_safety.py",
+        "--profile",
+        "workspace-local",
+        "--staged",
+    )
+    run(
+        "matter commit",
+        "git",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "--no-verify",
+        "-m",
+        f"matter: initialize {matter_id}",
+    )
+    start_output = run(
+        "session start",
+        sys.executable,
+        str(root / "scripts/start_session.py"),
+        "--slug",
+        "release-check",
+        "--matter",
+        matter_id,
+        "--objective",
+        "Verify the synthetic release lifecycle",
+        "--create-branch",
+    )
+    session_lines = [line for line in start_output.splitlines() if line.startswith("session:")]
+    if len(session_lines) != 1:
+        raise BuildError("Lifecycle smoke did not report exactly one session ID.")
+    session_id = session_lines[0].split(":", 1)[1].strip()
+    run(
+        "session finish",
+        sys.executable,
+        str(root / "scripts/finish_session.py"),
+        "--session",
+        session_id,
+        "--summary",
+        "Synthetic lifecycle completed.",
+        "--next-action",
+        "Discard this temporary workspace.",
+        "--tests",
+        "Release build lifecycle gate passed.",
+    )
+    if not (root / "memory/sessions" / f"{session_id}.md").is_file():
+        raise BuildError("Lifecycle smoke did not create the session handoff.")
+    root_commits = run("initial commit stability", "git", "rev-list", "--max-parents=0", "HEAD")
+    if root_commits.strip() != first_commit:
+        raise BuildError("Lifecycle smoke lost or replaced the initial commit.")
+    _run_runtime_check(
+        root,
+        "scripts/validate_workspace.py",
+        "--mode",
+        "operational",
+        "--root",
+        str(root),
+    )
+    _run_runtime_check(
+        root,
+        "scripts/check_repo_safety.py",
+        "--profile",
+        "workspace-local",
+    )
+    _run_runtime_check(
+        root,
+        "scripts/run_synthetic_e2e.py",
+        "--out-dir",
+        str(root / "matters" / matter_id / "outputs" / "synthetic-e2e"),
+    )
 
 
 def _build_once(
@@ -732,9 +962,12 @@ def _build_once(
         encoding="utf-8",
         newline="\n",
     )
+    manifest = verify_zip_archive(archive_path, expected_version=version)
+    sbom_path = _write_spdx_sbom(repo_root, archive_path, manifest, version, epoch)
     return BuildResult(
         archive=archive_path,
         checksum_file=checksum_path,
+        sbom_file=sbom_path,
         sha256=digest,
         file_count=len(payload),
         source_date_epoch=epoch,
@@ -776,16 +1009,20 @@ def build_release(
             if (
                 first.sha256 != second.sha256
                 or first.archive.read_bytes() != second.archive.read_bytes()
+                or first.sbom_file.read_bytes() != second.sbom_file.read_bytes()
             ):
                 raise BuildError("Two clean builds are not byte-for-byte reproducible.")
             output_dir.mkdir(parents=True, exist_ok=True)
             final_archive = output_dir / first.archive.name
             final_checksum = output_dir / first.checksum_file.name
+            final_sbom = output_dir / first.sbom_file.name
             shutil.copyfile(first.archive, final_archive)
             shutil.copyfile(first.checksum_file, final_checksum)
+            shutil.copyfile(first.sbom_file, final_sbom)
             return BuildResult(
                 archive=final_archive,
                 checksum_file=final_checksum,
+                sbom_file=final_sbom,
                 sha256=first.sha256,
                 file_count=first.file_count,
                 source_date_epoch=first.source_date_epoch,
@@ -838,6 +1075,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
     print(f"archive: {result.archive}")
     print(f"checksum: {result.checksum_file}")
+    print(f"sbom: {result.sbom_file}")
     print(f"sha256: {result.sha256}")
     print(f"payload_files: {result.file_count}")
     print(f"source_date_epoch: {result.source_date_epoch}")

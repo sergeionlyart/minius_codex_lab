@@ -8,7 +8,6 @@ import ast
 import hashlib
 import json
 import re
-import stat
 import tomllib
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
@@ -17,7 +16,6 @@ from typing import Any
 
 PROJECT_NAME = "minius_codex_lab"
 PACKAGE_NAME = "minius_codex_lab-workspace"
-CURRENT_VERSION = "1.0.0-beta.1"
 EXPECTED_MAPPINGS = (
     ("workspace-template", ""),
     (".agents/skills", ".agents/skills"),
@@ -62,6 +60,7 @@ UPSTREAM_REQUIRED_PATHS = (
     "pyproject.toml",
     "scripts/build_release.py",
     "scripts/check_repo_safety.py",
+    "scripts/codex_runtime_probe.py",
     "scripts/validate_workspace.py",
     "tests",
     "tools/verifiable_document",
@@ -70,9 +69,13 @@ UPSTREAM_REQUIRED_PATHS = (
     "workspace-template/AGENTS.md",
     "workspace-template/README.md",
     "workspace-template/requirements.txt",
+    "workspace-template/docs/CODEX_SMOKE_TEST.md",
+    "workspace-template/docs/INSTALL_WINDOWS_POWERSHELL.md",
     "workspace-template/matters/_template/MATTER.md",
     "workspace-template/memory/CURRENT.md",
+    "workspace-template/scripts/init_workspace.py",
     "workspace-template/scripts/new_matter.py",
+    "workspace-template/scripts/run_synthetic_e2e.py",
 )
 
 RUNTIME_REQUIRED_PATHS = (
@@ -86,10 +89,14 @@ RUNTIME_REQUIRED_PATHS = (
     "PACKAGE_MANIFEST.json",
     "README.md",
     "requirements.txt",
+    "docs/CODEX_SMOKE_TEST.md",
+    "docs/INSTALL_WINDOWS_POWERSHELL.md",
     "matters/_template/MATTER.md",
     "memory/CURRENT.md",
     "scripts/check_repo_safety.py",
+    "scripts/init_workspace.py",
     "scripts/new_matter.py",
+    "scripts/run_synthetic_e2e.py",
     "scripts/validate_workspace.py",
     "tools/verifiable_document/README.md",
 )
@@ -111,14 +118,44 @@ READ_ONLY_ROLES = {
     "privacy_reviewer",
     "ua_law_researcher",
 }
+EXPECTED_SKILL_NAMES = {
+    "case-law-analysis",
+    "eu-acquis-analysis",
+    "legal-drafting",
+    "legal-monitoring",
+    "legal-qa-audit",
+    "matter-intake",
+    "quantitative-impact-analysis",
+    "redaction-and-disclosure",
+    "session-memory-handoff",
+    "source-provenance",
+    "ukrainian-legal-research",
+    "verifiable-legal-document",
+}
+EXPECTED_ROLE_NAMES = {
+    "case_law_analyst",
+    "document_engineer",
+    "eu_law_analyst",
+    "evidence_auditor",
+    "legal_coordinator",
+    "legal_drafter",
+    "policy_impact_analyst",
+    "privacy_reviewer",
+    "quantitative_analyst",
+    "ua_law_researcher",
+}
 EXCLUDED_SCAN_PARTS = {
     ".bootstrap",
     ".git",
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
+    ".tmp",
+    ".venv",
     "__pycache__",
+    "build",
     "dist",
+    "venv",
 }
 EXCLUDED_SCAN_PATHS = {
     "CODEX_MAINTAINER_BOOTSTRAP_MINIUS_CODEX_LAB_RU.md",
@@ -249,18 +286,52 @@ def _read_frontmatter(path: Path) -> dict[str, str]:
         end = next(index for index, line in enumerate(lines[1:], 1) if line.strip() == "---")
     except StopIteration as error:
         raise ValueError("Missing closing YAML frontmatter delimiter.") from error
-    result: dict[str, str] = {}
-    for line in lines[1:end]:
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if ":" not in line:
-            raise ValueError(f"Unsupported frontmatter line: {line!r}")
-        key, value = line.split(":", 1)
-        key = key.strip()
-        if key in result:
+    source = "\n".join(lines[1:end]) + "\n"
+    try:
+        import yaml
+    except ImportError as error:
+        raise ValueError("Install the declared PyYAML dependency.") from error
+    try:
+        node = yaml.compose(source, Loader=yaml.SafeLoader)
+        value = yaml.safe_load(source)
+    except yaml.YAMLError as error:
+        raise ValueError(f"Invalid YAML frontmatter: {error}") from error
+    if not isinstance(node, yaml.MappingNode) or not isinstance(value, dict):
+        raise ValueError("YAML frontmatter root must be a mapping.")
+    seen: set[str] = set()
+    for key_node, _ in node.value:
+        if not isinstance(key_node, yaml.ScalarNode) or key_node.tag != "tag:yaml.org,2002:str":
+            raise ValueError("Frontmatter keys must be plain strings; merges are not allowed.")
+        key = key_node.value
+        if key in seen:
             raise ValueError(f"Duplicate frontmatter key: {key}")
-        result[key] = value.strip().strip('"').strip("'")
+        seen.add(key)
+    result: dict[str, str] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str) or not item.strip():
+            raise ValueError("Frontmatter keys and values must be non-empty strings.")
+        result[key] = item.strip()
     return result
+
+
+def _declared_version(root: Path, findings: list[Finding]) -> str:
+    path = root / "PACKAGE_MANIFEST.json"
+    if not path.is_file():
+        return ""
+    value = _load_json(path, findings)
+    version = value.get("version") if isinstance(value, dict) else None
+    if not isinstance(version, str) or not re.fullmatch(
+        r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?",
+        version,
+    ):
+        _add(
+            findings,
+            "manifest_version",
+            "PACKAGE_MANIFEST.json",
+            "version must be a supported semantic-version string.",
+        )
+        return ""
+    return version
 
 
 def _validate_required_paths(root: Path, mode: str, findings: list[Finding]) -> None:
@@ -290,7 +361,17 @@ def _validate_skills(root: Path, findings: list[Finding]) -> int:
         return 0
     names: list[str] = []
     count = 0
-    for skill_dir in sorted(path for path in skills_root.iterdir() if path.is_dir()):
+    skill_dirs = sorted(path for path in skills_root.iterdir() if path.is_dir())
+    inventory = {path.name for path in skill_dirs}
+    if inventory != EXPECTED_SKILL_NAMES:
+        _add(
+            findings,
+            "skill_inventory",
+            ".agents/skills",
+            f"missing={sorted(EXPECTED_SKILL_NAMES - inventory)}; "
+            f"extra={sorted(inventory - EXPECTED_SKILL_NAMES)}",
+        )
+    for skill_dir in skill_dirs:
         skill_path = skill_dir / "SKILL.md"
         relative = skill_path.relative_to(root).as_posix()
         if not skill_path.is_file():
@@ -363,7 +444,17 @@ def _validate_roles(root: Path, findings: list[Finding]) -> int:
         return 0
     names: list[str] = []
     role_values: dict[str, dict[str, Any]] = {}
-    for role_path in sorted(roles_root.glob("*.toml")):
+    role_paths = sorted(roles_root.glob("*.toml"))
+    inventory = {path.stem.replace("-", "_") for path in role_paths}
+    if inventory != EXPECTED_ROLE_NAMES:
+        _add(
+            findings,
+            "role_inventory",
+            ".codex/agents",
+            f"missing={sorted(EXPECTED_ROLE_NAMES - inventory)}; "
+            f"extra={sorted(inventory - EXPECTED_ROLE_NAMES)}",
+        )
+    for role_path in role_paths:
         relative = role_path.relative_to(root).as_posix()
         role = _load_toml(role_path, findings)
         if role is None:
@@ -467,11 +558,16 @@ def _validate_config(value: Mapping[str, Any], relative: str, findings: list[Fin
         _add(findings, "config_agents", relative, "agents.max_threads must be an integer.")
 
 
-def _validate_pyproject(value: Mapping[str, Any], relative: str, findings: list[Finding]) -> None:
+def _validate_pyproject(
+    value: Mapping[str, Any],
+    relative: str,
+    version: str,
+    findings: list[Finding],
+) -> None:
     project = value.get("project")
     if not isinstance(project, dict):
         _add(findings, "pyproject_project", relative, "Missing [project] table.")
-    elif project.get("name") != PROJECT_NAME or project.get("version") != CURRENT_VERSION:
+    elif project.get("name") != PROJECT_NAME or project.get("version") != version:
         _add(
             findings,
             "pyproject_project",
@@ -503,7 +599,11 @@ def _validate_pyproject(value: Mapping[str, Any], relative: str, findings: list[
         _add(findings, "pyproject_pytest", relative, "Missing pytest.ini_options.")
 
 
-def _validate_serialized_files(root: Path, findings: list[Finding]) -> tuple[int, int, int]:
+def _validate_serialized_files(
+    root: Path,
+    version: str,
+    findings: list[Finding],
+) -> tuple[int, int, int]:
     python_count = 0
     yaml_count = 0
     markdown_count = 0
@@ -526,7 +626,7 @@ def _validate_serialized_files(root: Path, findings: list[Finding]) -> tuple[int
             if relative.endswith(".codex/config.toml"):
                 _validate_config(value, relative, findings)
             if relative == "pyproject.toml":
-                _validate_pyproject(value, relative, findings)
+                _validate_pyproject(value, relative, version, findings)
         elif path.suffix.casefold() in {".yaml", ".yml"}:
             yaml_count += 1
             value = _load_yaml(path, findings)
@@ -544,7 +644,7 @@ def _validate_serialized_files(root: Path, findings: list[Finding]) -> tuple[int
     return python_count, yaml_count, markdown_count
 
 
-def _validate_project_manifest(root: Path, findings: list[Finding]) -> None:
+def _validate_project_manifest(root: Path, version: str, findings: list[Finding]) -> None:
     path = root / "PACKAGE_MANIFEST.json"
     if not path.is_file():
         return
@@ -567,9 +667,9 @@ def _validate_project_manifest(root: Path, findings: list[Finding]) -> None:
         "schema_version": 1,
         "project": PROJECT_NAME,
         "package": PACKAGE_NAME,
-        "version": CURRENT_VERSION,
+        "version": version,
         "layout": "workspace-template-overlay",
-        "release_asset": f"{PACKAGE_NAME}-v{CURRENT_VERSION}.zip",
+        "release_asset": f"{PACKAGE_NAME}-v{version}.zip",
     }
     for key, expected in expected_scalars.items():
         if value.get(key) != expected:
@@ -641,7 +741,7 @@ def _parse_checksums(path: Path, findings: list[Finding]) -> dict[str, str]:
     return result
 
 
-def _validate_runtime_manifest(root: Path, findings: list[Finding]) -> int:
+def _validate_runtime_manifest(root: Path, version: str, findings: list[Finding]) -> int:
     manifest_path = root / "PACKAGE_MANIFEST.json"
     checksum_path = root / "CHECKSUMS.sha256"
     if not manifest_path.is_file() or not checksum_path.is_file():
@@ -661,7 +761,7 @@ def _validate_runtime_manifest(root: Path, findings: list[Finding]) -> int:
     expected = {
         "schema_version": 1,
         "package": PACKAGE_NAME,
-        "version": CURRENT_VERSION,
+        "version": version,
         "layout": "extract-directly-into-workspace-root",
     }
     for key, expected_value in expected.items():
@@ -697,9 +797,13 @@ def _validate_runtime_manifest(root: Path, findings: list[Finding]) -> int:
             _add(findings, "runtime_manifest_size", relative, "Declared size differs.")
         if record.get("sha256") != _sha256(path):
             _add(findings, "runtime_manifest_hash", relative, "Declared SHA-256 differs.")
-        mode = stat.S_IMODE(path.stat().st_mode)
-        if record.get("mode") != f"{mode:04o}":
-            _add(findings, "runtime_manifest_mode", relative, "Declared mode differs.")
+        if record.get("mode") not in {"0644", "0755"}:
+            _add(
+                findings,
+                "runtime_manifest_mode",
+                relative,
+                "Declared mode must be normalized to 0644 or 0755.",
+            )
     actual = {
         path.relative_to(root).as_posix()
         for path in _iter_files(root)
@@ -728,7 +832,7 @@ def _validate_runtime_manifest(root: Path, findings: list[Finding]) -> int:
     return len(declared)
 
 
-def _validate_upstream_invariants(root: Path, findings: list[Finding]) -> None:
+def _validate_upstream_invariants(root: Path, version: str, findings: list[Finding]) -> None:
     maintainer_agents = root / "AGENTS.md"
     runtime_agents = root / "workspace-template/AGENTS.md"
     if (
@@ -744,8 +848,16 @@ def _validate_upstream_invariants(root: Path, findings: list[Finding]) -> None:
         )
     for relative in ("README.md", "CHANGELOG.md"):
         path = root / relative
-        if path.is_file() and CURRENT_VERSION not in path.read_text(encoding="utf-8"):
-            _add(findings, "version_not_documented", relative, f"Missing {CURRENT_VERSION}.")
+        if path.is_file() and version not in path.read_text(encoding="utf-8"):
+            _add(findings, "version_not_documented", relative, f"Missing {version}.")
+    release_note = root / "docs" / "releases" / f"v{version}.md"
+    if not release_note.is_file():
+        _add(
+            findings,
+            "release_notes_missing",
+            release_note.relative_to(root).as_posix(),
+            "Canonical manifest version requires matching release notes.",
+        )
     matters = root / "workspace-template/matters"
     if matters.is_dir():
         allowed = {"_template", "AGENTS.md", "README.md"}
@@ -770,24 +882,30 @@ def _validate_upstream_invariants(root: Path, findings: list[Finding]) -> None:
 
 
 def validate_workspace(root: Path, mode: str) -> dict[str, Any]:
-    if mode not in {"upstream", "runtime"}:
+    if mode not in {"upstream", "runtime", "operational"}:
         raise ValueError(f"Unsupported validation mode: {mode}")
     root = root.resolve()
     findings: list[Finding] = []
+    version = _declared_version(root, findings)
     _validate_required_paths(root, mode, findings)
     _validate_symlinks(root, findings)
     skills = _validate_skills(root, findings)
     roles = _validate_roles(root, findings)
-    python_files, yaml_files, markdown_files = _validate_serialized_files(root, findings)
+    python_files, yaml_files, markdown_files = _validate_serialized_files(
+        root,
+        version,
+        findings,
+    )
     manifest_files = 0
     if mode == "upstream":
-        _validate_project_manifest(root, findings)
-        _validate_upstream_invariants(root, findings)
-    else:
-        manifest_files = _validate_runtime_manifest(root, findings)
+        _validate_project_manifest(root, version, findings)
+        _validate_upstream_invariants(root, version, findings)
+    elif mode == "runtime":
+        manifest_files = _validate_runtime_manifest(root, version, findings)
     return {
         "root": str(root),
         "mode": mode,
+        "version": version,
         "valid": not findings,
         "metrics": {
             "skills": skills,
@@ -805,9 +923,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode",
-        choices=("upstream", "runtime"),
+        choices=("upstream", "runtime", "operational"),
         default="runtime",
-        help="Validation contract (default: runtime for release workspaces).",
+        help=(
+            "Validation contract: runtime verifies a pristine release exactly; "
+            "operational validates an initialized mutable workspace."
+        ),
     )
     parser.add_argument("--root", type=Path, help="Root to validate; defaults to script parent.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable result.")

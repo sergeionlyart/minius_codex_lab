@@ -61,7 +61,7 @@ Tests and review should explicitly exercise these cases with synthetic inputs.
 - endpoint malware, physical access, and organization IAM beyond documented
   integration boundaries;
 - availability or authenticity guarantees for external legal websites;
-- safe automatic upgrade of existing user workspaces in beta.1.
+- safe automatic upgrade of existing user workspaces during the beta channel.
 
 ## Review triggers
 

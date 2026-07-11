@@ -44,4 +44,4 @@ tests, and reproducibility take priority over schedule.
    local, optional, and unable to publish user memory by default.
 
 The sixth item is explicitly post-bootstrap and is not implemented in
-`1.0.0-beta.1`.
+`1.0.0-beta.2`.

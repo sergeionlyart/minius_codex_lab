@@ -1,4 +1,4 @@
-# Optional dependencies. HTML build and core validation use only Python standard library.
-python-docx>=1.1,<2
-pypdf>=5,<7
-jsonschema>=4,<5
+# Tested optional dependencies. HTML build and core validation use the standard library.
+python-docx==1.1.0
+pypdf==6.14.2
+jsonschema==4.23.0

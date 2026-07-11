@@ -9,6 +9,11 @@ from pathlib import Path
 
 from scripts import validate_workspace
 
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_VERSION = json.loads((SOURCE_ROOT / "PACKAGE_MANIFEST.json").read_text(encoding="utf-8"))[
+    "version"
+]
+
 DIRECTORY_PATHS = {
     ".agents/skills",
     ".codex/agents",
@@ -43,21 +48,27 @@ HOOKS = {
     }
 }
 
-SKILL = (
-    "---\n"
-    "name: example-skill\n"
-    "description: Используй этот навык для полностью синтетической проверки "
-    "контракта; не используй его для реальной юридической работы.\n"
-    "---\n\n"
-    "# Example\n\n"
-    "## Contract\n\n"
-    "- Job-to-be-done: validate a fixture.\n"
-    "- Inputs: synthetic files.\n"
-    "- Outputs: validation result.\n"
-    "- Evidence and safety: synthetic evidence only.\n"
-    "- Stop conditions: stop on malformed input.\n"
-    "- Acceptance test: validator returns no findings.\n"
-)
+SKILL_NAME = "case-law-analysis"
+
+
+def _skill(name: str) -> str:
+    return (
+        "---\n"
+        f"name: {name}\n"
+        "description: >-\n"
+        "  Используй этот навык для полностью синтетической проверки: контракт\n"
+        "  должен пройти настоящий YAML parser; не используй его для реальной\n"
+        "  юридической работы.\n"
+        "---\n\n"
+        "# Example\n\n"
+        "## Contract\n\n"
+        "- Job-to-be-done: validate a fixture.\n"
+        "- Inputs: synthetic files.\n"
+        "- Outputs: validation result.\n"
+        "- Evidence and safety: synthetic evidence only.\n"
+        "- Stop conditions: stop on malformed input.\n"
+        "- Acceptance test: validator returns no findings.\n"
+    )
 
 
 def _role(name: str, sandbox: str, extra: str = "") -> str:
@@ -87,12 +98,10 @@ def _manifest() -> dict[str, object]:
         "schema_version": 1,
         "project": validate_workspace.PROJECT_NAME,
         "package": validate_workspace.PACKAGE_NAME,
-        "version": validate_workspace.CURRENT_VERSION,
+        "version": SOURCE_VERSION,
         "layout": "workspace-template-overlay",
         "default_source_date_epoch": 1783771200,
-        "release_asset": (
-            f"{validate_workspace.PACKAGE_NAME}-v{validate_workspace.CURRENT_VERSION}.zip"
-        ),
+        "release_asset": (f"{validate_workspace.PACKAGE_NAME}-v{SOURCE_VERSION}.zip"),
         "payload_mappings": [
             {"source": source, "target": target}
             for source, target in validate_workspace.EXPECTED_MAPPINGS
@@ -101,18 +110,17 @@ def _manifest() -> dict[str, object]:
 
 
 def _write_contract_files(root: Path) -> None:
-    _write(root, ".agents/skills/example-skill/SKILL.md", SKILL)
-    _write(
-        root,
-        ".codex/agents/legal-coordinator.toml",
-        _role(
-            "legal_coordinator",
-            "workspace-write",
-            "Require a single owner for every shared final file.",
-        ),
-    )
-    _write(root, ".codex/agents/legal-drafter.toml", _role("legal_drafter", "workspace-write"))
-    _write(root, ".codex/agents/ua-law-researcher.toml", _role("ua_law_researcher", "read-only"))
+    for name in validate_workspace.EXPECTED_SKILL_NAMES:
+        _write(root, f".agents/skills/{name}/SKILL.md", _skill(name))
+    for name in validate_workspace.EXPECTED_ROLE_NAMES:
+        sandbox = "read-only" if name in validate_workspace.READ_ONLY_ROLES else "workspace-write"
+        extra = (
+            "Require a single owner for every shared final file."
+            if name == "legal_coordinator"
+            else ""
+        )
+        filename = name.replace("_", "-")
+        _write(root, f".codex/agents/{filename}.toml", _role(name, sandbox, extra))
 
 
 def _create_upstream(root: Path) -> None:
@@ -125,8 +133,9 @@ def _create_upstream(root: Path) -> None:
             _write(root, relative)
     _write(root, "AGENTS.md", "maintainer instructions\n")
     _write(root, "workspace-template/AGENTS.md", "runtime instructions\n")
-    _write(root, "README.md", f"Version {validate_workspace.CURRENT_VERSION}\n")
-    _write(root, "CHANGELOG.md", f"## {validate_workspace.CURRENT_VERSION}\n")
+    _write(root, "README.md", f"Version {SOURCE_VERSION}\n")
+    _write(root, "CHANGELOG.md", f"## {SOURCE_VERSION}\n")
+    _write(root, f"docs/releases/v{SOURCE_VERSION}.md", f"# Release {SOURCE_VERSION}\n")
     _write(root, ".codex/config.toml", CONFIG)
     _write(root, "workspace-template/.codex/config.toml", CONFIG)
     _write(root, "workspace-template/.codex/hooks.json", json.dumps(HOOKS))
@@ -134,10 +143,10 @@ def _create_upstream(root: Path) -> None:
     _write(
         root,
         "pyproject.toml",
-        """\
+        f"""\
 [project]
 name = "minius_codex_lab"
-version = "1.0.0-beta.1"
+version = "{SOURCE_VERSION}"
 requires-python = ">=3.11"
 
 [project.optional-dependencies]
@@ -189,7 +198,7 @@ def _seal_runtime(root: Path) -> None:
     manifest = {
         "schema_version": 1,
         "package": validate_workspace.PACKAGE_NAME,
-        "version": validate_workspace.CURRENT_VERSION,
+        "version": SOURCE_VERSION,
         "generated_at_utc": "2026-07-11T12:00:00Z",
         "layout": "extract-directly-into-workspace-root",
         "files": records,
@@ -226,10 +235,85 @@ class ValidateWorkspaceTests(unittest.TestCase):
         self.assertTrue(result["valid"], result["findings"])
 
     def test_missing_skill_contract_marker_is_reported(self) -> None:
-        skill = self.root / ".agents/skills/example-skill/SKILL.md"
-        skill.write_text(SKILL.replace("- Acceptance test: validator returns no findings.\n", ""))
+        skill = self.root / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        skill.write_text(
+            _skill(SKILL_NAME).replace(
+                "- Acceptance test: validator returns no findings.\n",
+                "",
+            )
+        )
         result = validate_workspace.validate_workspace(self.root, "upstream")
         self.assertIn("skill_contract_marker", _codes(result))
+
+    def test_frontmatter_accepts_folded_yaml_with_colon(self) -> None:
+        skill = self.root / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        frontmatter = validate_workspace._read_frontmatter(skill)
+        self.assertEqual(frontmatter["name"], SKILL_NAME)
+        self.assertIn("проверки: контракт", frontmatter["description"])
+
+    def test_frontmatter_rejects_unquoted_colon(self) -> None:
+        skill = self.root / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        text = _skill(SKILL_NAME).replace(
+            "description: >-\n"
+            "  Используй этот навык для полностью синтетической проверки: контракт\n"
+            "  должен пройти настоящий YAML parser; не используй его для реальной\n"
+            "  юридической работы.\n",
+            "description: Используй для проверки: это невалидный YAML scalar; "
+            "не используй для реальной работы.\n",
+        )
+        skill.write_text(text, encoding="utf-8")
+        result = validate_workspace.validate_workspace(self.root, "upstream")
+        self.assertIn("skill_frontmatter", _codes(result))
+
+    def test_frontmatter_rejects_duplicate_keys(self) -> None:
+        skill = self.root / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        text = _skill(SKILL_NAME).replace(
+            f"name: {SKILL_NAME}\n",
+            f"name: {SKILL_NAME}\nname: {SKILL_NAME}\n",
+        )
+        skill.write_text(text, encoding="utf-8")
+        result = validate_workspace.validate_workspace(self.root, "upstream")
+        self.assertIn("skill_frontmatter", _codes(result))
+
+    def test_frontmatter_rejects_non_string_values_and_unsafe_tags(self) -> None:
+        skill = self.root / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        original = _skill(SKILL_NAME)
+        invalid_values = ("42", "true", "null", "[one, two]", "!!python/object:example {}")
+        for value in invalid_values:
+            with self.subTest(value=value):
+                text = original.replace(
+                    "description: >-\n"
+                    "  Используй этот навык для полностью синтетической проверки: контракт\n"
+                    "  должен пройти настоящий YAML parser; не используй его для реальной\n"
+                    "  юридической работы.\n",
+                    f"description: {value}\n",
+                )
+                skill.write_text(text, encoding="utf-8")
+                result = validate_workspace.validate_workspace(self.root, "upstream")
+                self.assertIn("skill_frontmatter", _codes(result))
+
+    def test_skill_inventory_is_exact(self) -> None:
+        skill = self.root / ".agents/skills/legal-monitoring/SKILL.md"
+        skill.unlink()
+        skill.parent.rmdir()
+        result = validate_workspace.validate_workspace(self.root, "upstream")
+        self.assertIn("skill_inventory", _codes(result))
+
+    def test_runtime_uses_the_same_strict_frontmatter_parser(self) -> None:
+        runtime = Path(self.temporary.name) / "runtime-frontmatter"
+        runtime.mkdir()
+        _create_runtime(runtime)
+        skill = runtime / f".agents/skills/{SKILL_NAME}/SKILL.md"
+        skill.write_text(
+            _skill(SKILL_NAME).replace(
+                f"name: {SKILL_NAME}\n",
+                f"name: {SKILL_NAME}\nname: {SKILL_NAME}\n",
+            ),
+            encoding="utf-8",
+        )
+        _seal_runtime(runtime)
+        result = validate_workspace.validate_workspace(runtime, "runtime")
+        self.assertIn("skill_frontmatter", _codes(result))
 
     def test_missing_role_contract_marker_and_read_only_violation_are_reported(self) -> None:
         role_path = self.root / ".codex/agents/ua-law-researcher.toml"
@@ -249,7 +333,7 @@ class ValidateWorkspaceTests(unittest.TestCase):
         _write(
             self.root,
             "README.md",
-            f"Version {validate_workspace.CURRENT_VERSION}\n\n```python\n",
+            f"Version {SOURCE_VERSION}\n\n```python\n",
         )
         result = validate_workspace.validate_workspace(self.root, "upstream")
         self.assertTrue({"invalid_yaml", "markdown_unclosed_fence"}.issubset(_codes(result)))
@@ -273,6 +357,23 @@ class ValidateWorkspaceTests(unittest.TestCase):
         _write(runtime, "unexpected.txt", "not declared\n")
         invalid = validate_workspace.validate_workspace(runtime, "runtime")
         self.assertIn("runtime_manifest_exact_set", _codes(invalid))
+
+    def test_runtime_integrity_ignores_virtual_environment(self) -> None:
+        runtime = Path(self.temporary.name) / "runtime-venv"
+        runtime.mkdir()
+        _create_runtime(runtime)
+        _write(runtime, ".venv/lib/python3.11/site-packages/probe.py", "synthetic = True\n")
+        result = validate_workspace.validate_workspace(runtime, "runtime")
+        self.assertTrue(result["valid"], result["findings"])
+
+    def test_operational_mode_allows_expected_mutable_workspace_files(self) -> None:
+        runtime = Path(self.temporary.name) / "runtime-operational"
+        runtime.mkdir()
+        _create_runtime(runtime)
+        _write(runtime, "matters/2026-001/MATTER.md", "# Synthetic matter\n")
+        _write(runtime, "memory/CURRENT.md", "# Changed operational memory\n")
+        result = validate_workspace.validate_workspace(runtime, "operational")
+        self.assertTrue(result["valid"], result["findings"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,10 @@
 ---
 name: session-memory-handoff
-description: Начни, веди и заверши исследовательскую сессию с Git-операционной памятью: branch/worktree, session note, смысловые commits, CURRENT.md и handoff. Используй для параллельных/долгих задач; не используй для одношаговой задачи без durable state и не делай автоматический push.
+description: >-
+  Начни, веди и заверши исследовательскую сессию с Git-операционной памятью:
+  branch/worktree, session note, смысловые commits, CURRENT.md и handoff.
+  Используй для параллельных/долгих задач; не используй для одношаговой задачи
+  без durable state и не делай автоматический push.
 ---
 
 # Межсессионная память и handoff

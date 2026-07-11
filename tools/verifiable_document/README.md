@@ -10,6 +10,8 @@
 - SHA-256 исходного файла и нормализованного текста каждого unit;
 - обязательные locator и verification status;
 - существование всех внутренних HTML anchors и DOCX bookmarks.
+- запрет absolute local paths и обязательную human verification для material
+  claims и page-image/OCR evidence.
 
 Автоматическая проверка не доказывает юридическую применимость, полноту поиска, правильность квалификации или достаточность фрагмента. Это предмет независимого юридического аудита.
 
@@ -48,13 +50,18 @@ python3 tools/verifiable_document/ingest.py \
 ```bash
 python3 tools/verifiable_document/validate.py \
   matters/2026-001/drafts/report.spec.json \
-  --report matters/2026-001/reviews/report.validation.json
+  --report matters/2026-001/reviews/report.validation.json \
+  --strict
 
 python3 tools/verifiable_document/build.py \
   matters/2026-001/drafts/report.spec.json \
   --out-dir matters/2026-001/outputs/verifiable \
   --html --docx
 ```
+
+Builder по умолчанию блокирует не только errors, но и warnings. Флаг
+`--allow-warnings` существует только для явно рассмотренного исключения и не
+отменяет errors.
 
 Для установки optional dependencies:
 
@@ -76,5 +83,12 @@ python3 tools/verifiable_document/build.py \
   tools/verifiable_document/examples/spec.example.json \
   --out-dir .tmp/verifiable-example --html --docx
 
+python3 scripts/run_synthetic_e2e.py
+
 python3 -m unittest discover -s tools/verifiable_document/tests -v
 ```
+
+`run_synthetic_e2e.py` повторно ingests исходный TXT, сравнивает source/unit
+hashes и claim/evidence/link graph с `examples/semantic.expected.json`, затем
+проверяет фактические HTML anchors и DOCX bookmarks. Fixture полностью
+синтетический и не является источником права.

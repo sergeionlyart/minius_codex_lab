@@ -1,2 +1,13 @@
 # Verified repository owner; branch protection does not require external approval.
 * @sergeionlyart
+
+# Security- and release-critical paths are explicit for review visibility.
+/.github/ @sergeionlyart
+/.agents/skills/ @sergeionlyart
+/.codex/ @sergeionlyart
+/scripts/ @sergeionlyart
+/workspace-template/.codex/ @sergeionlyart
+/PACKAGE_MANIFEST.json @sergeionlyart
+/SECURITY.md @sergeionlyart
+/docs/RELEASING.md @sergeionlyart
+/docs/releases/ @sergeionlyart

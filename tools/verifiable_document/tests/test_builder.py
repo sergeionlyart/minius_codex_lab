@@ -6,6 +6,7 @@ import json
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parents[1]
@@ -18,7 +19,10 @@ from build import (  # noqa: E402
     validate_docx_links,
     validate_html_links,
 )
-from common import load_json  # noqa: E402
+from build import (  # noqa: E402
+    main as build_main,
+)
+from common import load_json, safe_html_id  # noqa: E402
 from validate import validate_spec  # noqa: E402
 
 
@@ -82,6 +86,93 @@ class VerifiableDocumentTests(unittest.TestCase):
         report = validate_spec(json.loads(json.dumps(self.spec)), self.spec_path)
         codes = {finding["code"] for finding in report["findings"]}
         self.assertNotIn("source_hash_mismatch", codes)
+
+    def test_changed_source_file_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.example.txt"
+            source.write_text("tampered synthetic source\n", encoding="utf-8")
+            spec_path = root / "spec.json"
+            spec_path.write_text(json.dumps(self.spec), encoding="utf-8")
+            report = validate_spec(copy.deepcopy(self.spec), spec_path)
+            codes = {finding["code"] for finding in report["findings"]}
+            self.assertFalse(report["valid"])
+            self.assertIn("source_hash_mismatch", codes)
+
+    def test_absolute_local_path_is_rejected(self) -> None:
+        for local_path in ("/private/synthetic/source.txt", r"C:\synthetic\source.txt"):
+            with self.subTest(local_path=local_path):
+                spec = copy.deepcopy(self.spec)
+                spec["sources"][0]["local_path"] = local_path
+                report = validate_spec(spec, self.spec_path)
+                codes = {finding["code"] for finding in report["findings"]}
+                self.assertFalse(report["valid"])
+                self.assertIn("absolute_local_path", codes)
+
+    def test_unverified_page_image_evidence_is_rejected(self) -> None:
+        spec = copy.deepcopy(self.spec)
+        source = spec["sources"][0]
+        source["inclusion_mode"] = "page-image-evidence"
+        for unit in source["units"]:
+            unit["page"] = 1
+            unit["verification_status"] = "needs-human-verification"
+        report = validate_spec(spec, self.spec_path)
+        codes = {finding["code"] for finding in report["findings"]}
+        self.assertFalse(report["valid"])
+        self.assertIn("scan_human_verification_required", codes)
+        self.assertIn("material_claim_without_human_verified_unit", codes)
+
+    def test_broken_html_anchor_is_detected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "broken.html"
+            build_html(self.spec, output)
+            text = output.read_text(encoding="utf-8")
+            text = text.replace(
+                f'id="{safe_html_id("evidence", "SRC-EXAMPLE-001-U0001")}"',
+                'id="removed-SRC-EXAMPLE-001-U0001"',
+                1,
+            )
+            output.write_text(text, encoding="utf-8")
+            self.assertIn(
+                safe_html_id("evidence", "SRC-EXAMPLE-001-U0001"),
+                validate_html_links(output),
+            )
+
+    def test_broken_docx_bookmark_is_detected(self) -> None:
+        namespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+        xml = (
+            f'<w:document xmlns:w="{namespace}"><w:body><w:p>'
+            '<w:hyperlink w:anchor="missing_bookmark"/></w:p></w:body></w:document>'
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "broken.docx"
+            with zipfile.ZipFile(output, "w") as archive:
+                archive.writestr("word/document.xml", xml)
+            self.assertEqual(validate_docx_links(output), ["missing_bookmark"])
+
+    def test_build_blocks_warnings_unless_explicitly_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            spec = copy.deepcopy(self.spec)
+            spec["document"]["classification"] = "PERSONAL"
+            (root / "source.example.txt").write_bytes(
+                (TOOL_DIR / "examples/source.example.txt").read_bytes()
+            )
+            spec_path = root / "spec.json"
+            spec_path.write_text(json.dumps(spec), encoding="utf-8")
+            output = root / "output"
+            self.assertEqual(build_main([str(spec_path), "--out-dir", str(output)]), 1)
+            self.assertEqual(
+                build_main(
+                    [
+                        str(spec_path),
+                        "--out-dir",
+                        str(output),
+                        "--allow-warnings",
+                    ]
+                ),
+                0,
+            )
 
 
 if __name__ == "__main__":

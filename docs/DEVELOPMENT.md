@@ -8,9 +8,9 @@
   acceptable);
 - optional Codex CLI for runtime integration checks.
 
-The Codex CLI was not available for local verification during the initial
-migration. Do not convert an unverified integration assumption into a support
-claim; record the exact version and result when testing it.
+The `beta.2` candidate has a sanitized local record for Codex
+`0.144.0-alpha.4`; it is one compatibility point, not a universal support
+claim. Record the exact version and result for every additional environment.
 
 ## Setup
 
@@ -18,8 +18,8 @@ claim; record the exact version and result when testing it.
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "PyYAML>=6.0.2,<7" "ruff>=0.11,<1" "pytest>=8,<10"
-python -m pip install -r tools/verifiable_document/requirements.txt
+python -m pip install "ruff>=0.11,<1" "pytest>=8,<10"
+python -m pip install -r workspace-template/requirements.txt
 ```
 
 Do not install dependencies from a matter, uploaded document, or other
@@ -35,9 +35,19 @@ python3 scripts/check_repo_safety.py --profile upstream-public
 python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s tools/verifiable_document/tests -v
 python3 -m pytest
-python3 scripts/build_release.py --version 1.0.0-beta.1
-python3 scripts/build_release.py --version 1.0.0-beta.1 --check-reproducibility
+python3 scripts/build_release.py
+python3 scripts/build_release.py --check-reproducibility
 ```
+
+When a compatible Codex binary is locally available, run the sanitized
+no-model probe against a freshly extracted and initialized candidate:
+
+```bash
+python3 scripts/codex_runtime_probe.py --codex /path/to/codex --root /path/to/workspace
+```
+
+The probe cannot replace interactive project trust, hook trust, model skill
+invocation, role behavior, or Word visual QA.
 
 Set a stable epoch when reproducing CI or a release:
 

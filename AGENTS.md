@@ -29,8 +29,8 @@ root of the generated workspace.
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install "PyYAML>=6.0.2,<7" "ruff>=0.11,<1" "pytest>=8,<10"
-python -m pip install -r tools/verifiable_document/requirements.txt
+python -m pip install "ruff>=0.11,<1" "pytest>=8,<10"
+python -m pip install -r workspace-template/requirements.txt
 
 ruff check .
 ruff format --check .
@@ -39,8 +39,8 @@ python3 scripts/check_repo_safety.py --profile upstream-public
 python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s tools/verifiable_document/tests -v
 python3 -m pytest
-python3 scripts/build_release.py --version 1.0.0-beta.1
-python3 scripts/build_release.py --version 1.0.0-beta.1 --check-reproducibility
+python3 scripts/build_release.py
+python3 scripts/build_release.py --check-reproducibility
 ```
 
 ## Change rules

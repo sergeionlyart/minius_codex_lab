@@ -8,7 +8,7 @@ from collections import Counter
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlparse
 
@@ -20,6 +20,7 @@ try:
         ALLOWED_VERIFICATION_STATUS,
         iter_claims,
         load_json,
+        package_version,
         resolve_local_path,
         sha256_file,
         sha256_text,
@@ -33,6 +34,7 @@ except ImportError:  # Direct script execution.
         ALLOWED_VERIFICATION_STATUS,
         iter_claims,
         load_json,
+        package_version,
         resolve_local_path,
         sha256_file,
         sha256_text,
@@ -73,6 +75,14 @@ def _duplicate_values(values: Iterable[str]) -> list[str]:
 def _looks_like_url(value: str) -> bool:
     parsed = urlparse(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _is_absolute_path_on_any_platform(value: str) -> bool:
+    return (
+        Path(value).is_absolute()
+        or PurePosixPath(value).is_absolute()
+        or PureWindowsPath(value).is_absolute()
+    )
 
 
 def _optional_jsonschema_check(spec: dict[str, Any], findings: list[Finding]) -> None:
@@ -290,14 +300,13 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
                     "Expected a string.",
                 )
             else:
-                if Path(local_path).is_absolute():
+                if _is_absolute_path_on_any_platform(local_path):
                     _add(
                         findings,
-                        "warning",
+                        "error",
                         "absolute_local_path",
                         f"{source_path}/local_path",
-                        "Avoid publishing absolute local paths; use a "
-                        "repository-relative reference.",
+                        "Absolute local paths are forbidden; use a repository-relative reference.",
                     )
                 resolved_path = resolve_local_path(spec_path, local_path)
                 if not resolved_path.exists():
@@ -365,6 +374,17 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
                     unit_path,
                     "Page-image evidence units require a page locator.",
                 )
+            if (
+                inclusion_mode == "page-image-evidence"
+                and unit.get("verification_status") != "human-verified"
+            ):
+                _add(
+                    findings,
+                    "error",
+                    "scan_human_verification_required",
+                    unit_path,
+                    "Page-image/OCR evidence must be verified by a human before use.",
+                )
             units[unit_id] = (source, unit, unit_path)
 
     for duplicate in _duplicate_values(source_ids):
@@ -412,7 +432,7 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
         if claim.get("material") is True and evidence_refs and verified_support == 0:
             _add(
                 findings,
-                "warning",
+                "error",
                 "material_claim_without_human_verified_unit",
                 claim_path,
                 "No supporting unit is marked human-verified.",
@@ -439,7 +459,7 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
     warnings = [finding for finding in findings if finding.severity == "warning"]
     validated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return {
-        "validator": "minius_codex_lab-verifiable-document/1.0.0-beta.1",
+        "validator": f"minius_codex_lab-verifiable-document/{package_version()}",
         "validated_at_utc": validated_at,
         "spec_path": str(spec_path),
         "valid": not errors,

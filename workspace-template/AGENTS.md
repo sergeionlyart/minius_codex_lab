@@ -43,9 +43,12 @@
 
 ## Git как операционная память
 
+- До работы проверь `git config --local --get minius.initialized` и
+  `git config --local --get minius.memoryMode`. Не обходи initializer ручным
+  `git init`.
 - Одна параллельная исследовательская сессия — одна ветка `session/YYYYMMDD-<slug>` и предпочтительно отдельный worktree.
 - В начале создай `memory/sessions/<timestamp>--<slug>.md`; в конце обнови его и, при изменении устойчивого состояния проекта, `memory/CURRENT.md`.
-- Делай локальные смысловые коммиты после завершенного этапа, а не после каждой команды. Реальные matters/memory по умолчанию исключены `.gitignore`; включай их в локальную или организационно одобренную закрытую историю только после явного решения о хранении. Разрешенные префиксы: `ops:`, `matter:`, `source:`, `research:`, `evidence:`, `draft:`, `review:`, `decision:`, `memory:`, `artifact:`.
+- Делай локальные смысловые коммиты после завершенного этапа, а не после каждой команды. В `untracked` реальные matters/memory остаются ignored; в `local-git` и `private-approved` stage названных путей выполняется только явно после проверки классификации. Разрешенные префиксы: `ops:`, `matter:`, `source:`, `research:`, `evidence:`, `draft:`, `review:`, `decision:`, `memory:`, `artifact:`.
 - Не коммить секреты, временные файлы, сырые транскрипты и запрещенные классы данных.
 - Не выполняй `push`, создание/замену remote, merge в `main`, force-push, hard reset или удаление истории без явного разрешения. Видимость remote не делает restricted data допустимыми для публикации. Никогда не меняй существующий `origin` молча.
 - Перед handoff покажи `git status`, краткий diff, результаты проверок и нерешенные вопросы.

@@ -1,6 +1,6 @@
 # minius_codex_lab
 
-Current version: **1.0.0-beta.1**
+Current version: **1.0.0-beta.2**
 
 `minius_codex_lab` is an open-source source repository for Codex skills,
 specialized roles, safety controls, and verifiable-document tooling used to
@@ -15,9 +15,10 @@ build a separate legal-work runtime workspace.
 
 ## Beta status
 
-`1.0.0-beta.1` is the first public pre-release. Interfaces, workspace layout,
-and upgrade procedures may still change. Existing user workspaces are upgraded
-manually; there is no automatic updater yet.
+`1.0.0-beta.2` is the corrected testing pre-release. `1.0.0-beta.1` is
+superseded and must not be used for legal work because its skill metadata and
+first-run bootstrap gates were incomplete. Interfaces and upgrade procedures
+may still change; existing workspaces are upgraded manually.
 
 ## Choose the right installation
 
@@ -26,33 +27,36 @@ manually; there is no automatic updater yet.
 Do not clone this source repository as a working legal matter. From the GitHub
 Releases page, download:
 
-- `minius_codex_lab-workspace-v1.0.0-beta.1.zip`
-- `minius_codex_lab-workspace-v1.0.0-beta.1.zip.sha256`
+- `minius_codex_lab-workspace-v1.0.0-beta.2.zip`
+- `minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256`
+- `minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json` (SPDX 2.3 SBOM)
 
 Verify the checksum before extraction:
 
 ```bash
-sha256sum -c minius_codex_lab-workspace-v1.0.0-beta.1.zip.sha256
+sha256sum -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
 ```
 
 On macOS:
 
 ```bash
-shasum -a 256 -c minius_codex_lab-workspace-v1.0.0-beta.1.zip.sha256
+shasum -a 256 -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
 ```
 
 On PowerShell, compare the printed hash with the first value in the
 `.sha256` file:
 
 ```powershell
-Get-FileHash .\minius_codex_lab-workspace-v1.0.0-beta.1.zip -Algorithm SHA256
+Get-FileHash .\minius_codex_lab-workspace-v1.0.0-beta.2.zip -Algorithm SHA256
 ```
 
 Extract the ZIP into a new local or organization-approved private working
 folder, not over an upstream checkout. Then run:
 
 ```bash
+python3 scripts/validate_workspace.py --mode runtime
 python3 scripts/check_repo_safety.py --profile workspace-local
+python3 scripts/init_workspace.py --memory-mode untracked
 ```
 
 Read the runtime `README.md`, `AGENTS.md`, and `SECURITY.md` before adding
@@ -68,8 +72,8 @@ git clone https://github.com/sergeionlyart/minius_codex_lab.git
 cd minius_codex_lab
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install "PyYAML>=6.0.2,<7" "ruff>=0.11,<1" "pytest>=8,<10"
-python -m pip install -r tools/verifiable_document/requirements.txt
+python -m pip install "ruff>=0.11,<1" "pytest>=8,<10"
+python -m pip install -r workspace-template/requirements.txt
 python3 scripts/validate_workspace.py --mode upstream
 python3 scripts/check_repo_safety.py --profile upstream-public
 python3 -m unittest discover -s tests -v
@@ -109,11 +113,9 @@ scanner is a required gate. See `SECURITY.md`,
 
 ## Compatibility
 
-Python 3.11 is the documented runtime and configured CI target. A successful
-remote CI run must still be verified before the first release. The local Codex
-CLI and its support for project hooks/rules were not available for runtime
-verification during the initial migration; compatibility claims are therefore
-intentionally limited. See `docs/COMPATIBILITY.md`.
+Python 3.11 is the documented runtime. Linux, macOS and Windows lifecycle gates
+and the recorded Codex smoke-test scope are listed in `docs/COMPATIBILITY.md`;
+interactive project/hook trust and Word visual QA remain explicit human gates.
 
 ## Reporting and contributing
 

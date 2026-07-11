@@ -34,6 +34,16 @@ The original archive is not part of Git history or release assets.
   governance, contribution policy, and explicit non-affiliation/legal-review
   notices.
 
+## Audit remediation
+
+The first external audit of `1.0.0-beta.1` identified a validation-model gap:
+eight skill descriptions were not strict YAML, while the internal line-split
+parser still returned success. `1.0.0-beta.2` preserves the original tag and
+assets, marks that release superseded, and adds strict YAML, clean-install Git
+bootstrap, factual Codex probes, cross-platform lifecycle gates, semantic E2E,
+SBOM and artifact attestations. The source audit and remediation record are
+retained under `docs/task/`.
+
 ## Naming exception
 
 The old `minjust` name appears here only to identify the imported seed and may

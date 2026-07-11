@@ -37,6 +37,11 @@ def _git_root(root: Path) -> Path | None:
     return Path(result.stdout.strip()).resolve()
 
 
+def _git_config(root: Path, key: str) -> str:
+    result = _run(root, "git", "config", "--local", "--get", key, check=False)
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
 def _current_branch(root: Path) -> str:
     result = _run(root, "git", "branch", "--show-current", check=False)
     return result.stdout.strip() or "DETACHED"
@@ -159,6 +164,24 @@ def main(argv: list[str] | None = None) -> int:
     if git_root is None or git_root != original_root:
         print("ERROR: run from a Git-initialized workspace root.", file=sys.stderr)
         return 2
+    memory_mode = _git_config(original_root, "minius.memoryMode")
+    if _git_config(original_root, "minius.initialized") != "true" or memory_mode not in {
+        "untracked",
+        "local-git",
+        "private-approved",
+    }:
+        print(
+            "ERROR: initialize this release with scripts/init_workspace.py first.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.worktree and memory_mode == "untracked":
+        print(
+            "ERROR: --worktree requires local-git or private-approved memory mode "
+            "and a committed matter.",
+            file=sys.stderr,
+        )
+        return 1
     matter_file = original_root / "matters" / matter_id / "MATTER.md"
     if not matter_file.is_file():
         print(f"ERROR: matter not found: {matter_file}", file=sys.stderr)
@@ -263,7 +286,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"classification: {classification}")
     if branch in {"main", "master", "DETACHED"}:
         print("WARNING: session is not isolated on a session/* branch.")
-    print(f"recommended first commit: memory: start session {slug}")
+    if memory_mode == "untracked":
+        print("Git mode: untracked; session memory remains local and ignored.")
+    else:
+        print("Review the session metadata, then stage it explicitly if approved:")
+        print(f"  git add -- {session_path.relative_to(work_root).as_posix()} memory")
+        print(f'  git commit -m "memory: start session {slug}"')
     return 0
 
 

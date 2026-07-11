@@ -59,6 +59,7 @@ history.jsonl
 
 # Local setup/build artifacts and archives
 .bootstrap/
+.tmp/
 .setup-staging/
 .setup-backup/
 build/

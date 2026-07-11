@@ -3,6 +3,46 @@
 All notable public changes are documented here. The project follows Semantic
 Versioning while pre-release compatibility remains explicitly limited.
 
+## [1.0.0-beta.2] - 2026-07-11
+
+### Fixed
+
+- Replaced the permissive line-split skill frontmatter check with PyYAML
+  `safe_load`, duplicate-key detection, exact 12-skill inventory checks, and
+  negative fixtures for invalid YAML types/tags.
+- Converted all 12 skill descriptions to valid folded YAML scalars; eight were
+  invalid under a strict YAML parser in `beta.1`.
+- Added a safe, idempotent `init_workspace.py` that creates a standalone
+  `main` history, never creates a remote, and formalizes `untracked`,
+  `local-git`, and `private-approved` memory modes.
+- Split immutable release validation (`runtime`) from mutable workspace
+  validation (`operational`) and excluded virtual environments correctly.
+- Replaced lifecycle tests that manually seeded Git with clean-ZIP onboarding,
+  matter, branch, session, handoff, safety, and HTML/DOCX synthetic gates.
+
+### Changed
+
+- Added explicit project trust, `/hooks`, `/skills`, `/agent`, and rules
+  verification instructions plus native PowerShell onboarding.
+- Added a sanitized no-model Codex app-server/config/skills/hooks/rules probe;
+  manual trust and model behavior remain separate gates.
+- Made verifiable-document builds warning-strict by default and made absolute
+  paths, unverified material evidence, and unverified page-image/OCR evidence
+  blocking errors.
+- Made `PACKAGE_MANIFEST.json` the canonical machine-readable version source
+  and expanded Linux/macOS/Windows CI coverage.
+- Added a deterministic SPDX 2.3 SBOM as a third release asset.
+- Added GitHub artifact attestations for the release ZIP and SBOM as a
+  compensating provenance control where a maintainer signing key is absent.
+- Pinned runtime document/validation dependencies to the versions used by the
+  beta.2 compatibility gates.
+- Updated SHA-pinned GitHub Actions and added dependency review.
+
+### Security
+
+- `1.0.0-beta.1` is retained for reproducibility but marked superseded and
+  unsuitable for legal work.
+
 ## [1.0.0-beta.1] - 2026-07-11
 
 ### Added

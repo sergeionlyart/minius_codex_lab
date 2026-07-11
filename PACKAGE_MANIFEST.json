@@ -2,10 +2,10 @@
   "schema_version": 1,
   "project": "minius_codex_lab",
   "package": "minius_codex_lab-workspace",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "layout": "workspace-template-overlay",
   "default_source_date_epoch": 1783771200,
-  "release_asset": "minius_codex_lab-workspace-v1.0.0-beta.1.zip",
+  "release_asset": "minius_codex_lab-workspace-v1.0.0-beta.2.zip",
   "payload_mappings": [
     {
       "source": "workspace-template",
