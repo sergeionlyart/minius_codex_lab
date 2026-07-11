@@ -1,0 +1,89 @@
+name: Skill proposal
+description: Propose a new or materially changed reusable skill contract.
+title: "skill: "
+labels:
+  - skill-proposal
+body:
+  - type: input
+    id: job
+    attributes:
+      label: Job to be done
+      description: Who needs to accomplish what, and why?
+    validations:
+      required: true
+  - type: input
+    id: user
+    attributes:
+      label: Typical user
+    validations:
+      required: true
+  - type: textarea
+    id: trigger
+    attributes:
+      label: Trigger conditions
+      description: When should Codex select this skill?
+    validations:
+      required: true
+  - type: textarea
+    id: non_trigger
+    attributes:
+      label: Non-trigger conditions
+      description: When must the skill not run?
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      description: Required context, files, data classes, and preconditions.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected result
+      description: Outputs, artifacts, and definition of done.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence requirements
+      description: Provenance, locators, versions, verification, and uncertainty.
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and security risk
+      description: Data, network, tools, writes, failure modes, and stop conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Reproducible synthetic task
+      description: Include artificial inputs and expected observable behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criterion
+      description: Automated test/fixture or documented manual acceptance test.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility impact
+      description: Existing skills, roles, workspace, manifest, and SemVer effect.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: The proposal contains no real legal, personal, restricted, or secret data.
+          required: true

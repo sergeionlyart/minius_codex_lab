@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible defect using synthetic data only.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include real legal matters, personal data, restricted information,
+        credentials, or private logs. Security issues follow SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: 1.0.0-beta.1 or commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Skills
+        - Roles
+        - Runtime template
+        - Safety scanner
+        - Workspace validator
+        - Release builder
+        - Verifiable-document tool
+        - Documentation or CI
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Defect
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Provide minimal commands and artificial inputs.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, optional Codex version, and dependencies.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized output
+      description: Remove identities, local paths, tokens, and document content.
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: This report contains no real legal, personal, restricted, or secret data.
+          required: true
+        - label: This is not an undisclosed security vulnerability.
+          required: true

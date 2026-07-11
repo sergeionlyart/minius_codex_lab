@@ -1,0 +1,51 @@
+name: Feature request
+description: Propose a compatible product or tooling improvement.
+title: "feat: "
+labels:
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explain the user need with synthetic examples. Use the skill proposal
+        form for a new or materially changed skill.
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who needs to make what decision or complete what task?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: State observable behavior and acceptance criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include a smaller or documentation-only option if applicable.
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility impact
+      description: Identify workspace, manifest, skill, role, or release contract changes.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Privacy and security impact
+      description: New data, network, write, dependency, or trust-boundary effects.
+    validations:
+      required: true
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Public-data confirmation
+      options:
+        - label: The proposal and examples contain synthetic/public-safe data only.
+          required: true

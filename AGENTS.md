@@ -29,7 +29,7 @@ root of the generated workspace.
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install "PyYAML>=6.0.2,<7" ruff pytest
+python -m pip install "PyYAML>=6.0.2,<7" "ruff>=0.11,<1" "pytest>=8,<10"
 python -m pip install -r tools/verifiable_document/requirements.txt
 
 ruff check .
