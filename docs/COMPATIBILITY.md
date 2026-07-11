@@ -8,10 +8,10 @@ asset. File presence and static parsing do not prove Codex activation.
 
 | Component | beta.2 status |
 |---|---|
-| Python 3.11 | Local gates available; release-commit CI evidence is required before publication |
-| Ubuntu 24.04 | Matrix configured; release-commit result pending |
-| macOS 15 runner | Matrix configured; release-commit result pending |
-| Windows 2025 runner | Matrix configured; release-commit result pending |
+| Python 3.11 | Candidate quality gates PASS; release-tag workflow repeats them before publication |
+| Ubuntu 24.04 | Candidate lifecycle PASS |
+| macOS 15 runner | Candidate lifecycle PASS |
+| Windows 2025 runner | Candidate lifecycle PASS |
 | HTML output | Synthetic links, anchors and hashes pass locally |
 | DOCX output | Synthetic bookmarks and links pass technically; Microsoft Word visual QA not verified |
 | Codex CLI | Local candidate smoke recorded below |
@@ -20,6 +20,24 @@ asset. File presence and static parsing do not prove Codex activation.
 The earlier Ubuntu run for `beta.1` proved only its then-current CI. It does not
 establish `beta.2` compatibility because the old validator did not parse skill
 frontmatter as strict YAML.
+
+## Cross-platform candidate record
+
+The functional candidate at commit
+`5ca24e74954d14f19ef88c9c2fa0370796d2820a` passed the complete
+[CI run 29157558104](https://github.com/sergeionlyart/minius_codex_lab/actions/runs/29157558104)
+on 2026-07-11:
+
+- Python 3.11 quality gates: PASS;
+- dependency review: PASS;
+- Ubuntu 24.04, macOS 15 and Windows 2025 lifecycle: PASS;
+- cross-platform summary: PASS.
+
+The corresponding
+[CodeQL run 29157556958](https://github.com/sergeionlyart/minius_codex_lab/actions/runs/29157556958)
+passed both Python and Actions analysis. This evidence-record update changes no
+runtime payload. The exact release tag still repeats all gates and all three OS
+lifecycle jobs before it may publish assets.
 
 ## Local Codex candidate record
 

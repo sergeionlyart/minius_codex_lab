@@ -105,8 +105,16 @@ release SHA-256, SPDX SBOM и GitHub artifact attestations; отсутствие
 
 ## Публикационный статус
 
-Push, merge и `v1.0.0-beta.2` разрешены только после полного local gate,
-зелёных Linux/macOS/Windows checks на точном commit и повторной проверки
-скачанных release assets. Ссылки на итоговый commit, CI и release добавляются
-после их фактического появления; будущий результат не считается заранее
-успешным.
+Функциональный кандидат
+`5ca24e74954d14f19ef88c9c2fa0370796d2820a` в draft PR
+[#12](https://github.com/sergeionlyart/minius_codex_lab/pull/12) прошёл полный
+[CI run 29157558104](https://github.com/sergeionlyart/minius_codex_lab/actions/runs/29157558104):
+quality gates, dependency review, Ubuntu, macOS, Windows и cross-platform
+summary. Отдельный
+[CodeQL run 29157556958](https://github.com/sergeionlyart/minius_codex_lab/actions/runs/29157556958)
+прошёл Python и Actions analysis.
+
+Это evidence-only обновление не меняет runtime payload. Merge и
+`v1.0.0-beta.2` разрешены только после повторного CI последнего PR SHA, CI на
+`main`, tag workflow на точном release commit и проверки скачанных assets;
+будущий результат не считается заранее успешным.
