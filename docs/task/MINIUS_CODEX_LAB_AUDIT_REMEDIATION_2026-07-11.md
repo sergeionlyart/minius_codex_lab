@@ -59,7 +59,7 @@ python3 scripts/build_release.py --check-reproducibility
 
 ```text
 payload_files: 102
-archive_sha256: b2e34eb9d9595091d0cb3065a1c637ce940c4f7fbcace662f43f2bac3a05537d
+archive_sha256: 17d968f9ff5166020f63d3b6d238385acc9deba9404ad82d054f2e013f02c087
 reproducibility: PASS
 sbom: SPDX-2.3
 ```
@@ -80,6 +80,8 @@ read-only/network-disabled thread, четыре execpolicy case и unchanged Git
   `SUPERSEDED — DO NOT USE FOR LEGAL WORK`; тег и оба исходных asset сохранены.
 - Secret scanning и push protection включены.
 - Vulnerability alerts и Dependabot security updates включены.
+- Dependency review выявил уязвимый historical pin `pypdf 5.0.0`; он заменён
+  на актуальный `6.14.2`, поддерживающий Python 3.11, до merge.
 - GitHub Actions требуют full-SHA pinning.
 - CodeQL default setup для Python/Actions включён и прошёл initial scan.
 - Публичный dependency graph формирует SBOM; новый release дополнительно
