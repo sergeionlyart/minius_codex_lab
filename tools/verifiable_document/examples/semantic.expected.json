@@ -1,0 +1,66 @@
+{
+  "claims": [
+    {
+      "claim_id": "CLM-EX-001",
+      "counterevidence_refs": [],
+      "evidence_refs": [
+        "SRC-EXAMPLE-001-U0001"
+      ]
+    },
+    {
+      "claim_id": "CLM-EX-002",
+      "counterevidence_refs": [],
+      "evidence_refs": [
+        "SRC-EXAMPLE-001-U0002",
+        "SRC-EXAMPLE-001-U0003"
+      ]
+    },
+    {
+      "claim_id": "CLM-EX-003",
+      "counterevidence_refs": [],
+      "evidence_refs": [
+        "SRC-EXAMPLE-001-U0004",
+        "SRC-EXAMPLE-001-U0005"
+      ]
+    }
+  ],
+  "docx_bookmarks": {
+    "claims": {
+      "CLM-EX-001": "c_af4cd0cc2ba9091c36863563",
+      "CLM-EX-002": "c_5e4c26107209725dd5afb088",
+      "CLM-EX-003": "c_3abaaab5387444b92472e351"
+    },
+    "evidence": {
+      "SRC-EXAMPLE-001-U0001": "e_b3e926787cb636f6360e421a",
+      "SRC-EXAMPLE-001-U0002": "e_191a14fa82db290ca444c3c7",
+      "SRC-EXAMPLE-001-U0003": "e_81d9398fe017c254cd4b8fff",
+      "SRC-EXAMPLE-001-U0004": "e_985e18655e30b6198f991fca",
+      "SRC-EXAMPLE-001-U0005": "e_570c120d11157ac651ca5b1f"
+    }
+  },
+  "html_anchors": {
+    "claims": {
+      "CLM-EX-001": "claim-af4cd0cc2ba9091c",
+      "CLM-EX-002": "claim-5e4c26107209725d",
+      "CLM-EX-003": "claim-3abaaab5387444b9"
+    },
+    "evidence": {
+      "SRC-EXAMPLE-001-U0001": "evidence-b3e926787cb636f6",
+      "SRC-EXAMPLE-001-U0002": "evidence-191a14fa82db290c",
+      "SRC-EXAMPLE-001-U0003": "evidence-81d9398fe017c254",
+      "SRC-EXAMPLE-001-U0004": "evidence-985e18655e30b619",
+      "SRC-EXAMPLE-001-U0005": "evidence-570c120d11157ac6"
+    }
+  },
+  "schema_version": 1,
+  "sources": {
+    "SRC-EXAMPLE-001": "479358523e8c0ccfa97499eac86f99a3418849551dd6d0d2df9a6e0b9e8ef8f4"
+  },
+  "units": {
+    "SRC-EXAMPLE-001-U0001": "81f592cc31f25d4d6d32b86b9bc200b96407db7da5876f5e263cf279ec9f8cc8",
+    "SRC-EXAMPLE-001-U0002": "7e83e3ee35cd9dd3ef1d4ceca5e445ebabc9fa4a43e1ef4d4c5fa7f1ca55a134",
+    "SRC-EXAMPLE-001-U0003": "c92fa961ebfb39c88863fc20926dbfa44dd7d0d3008601dddc55f6be0a4fdfa2",
+    "SRC-EXAMPLE-001-U0004": "55a8dd10fb56adc663c6c7e35e6972696937775079f3cb04833b65712f15a115",
+    "SRC-EXAMPLE-001-U0005": "2a67a4042136f9b4a10f286fa2ebda176f96be8b24085ba5e0f316e94b502828"
+  }
+}

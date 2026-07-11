@@ -17,6 +17,7 @@ try:
     from .common import (
         iter_claims,
         load_json,
+        package_version,
         safe_html_id,
         safe_word_bookmark,
         sha256_file,
@@ -28,6 +29,7 @@ except ImportError:  # Direct script execution.
     from common import (  # type: ignore[no-redef]
         iter_claims,
         load_json,
+        package_version,
         safe_html_id,
         safe_word_bookmark,
         sha256_file,
@@ -540,6 +542,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--html", action="store_true", help="Build self-contained HTML.")
     parser.add_argument("--docx", action="store_true", help="Build DOCX with internal bookmarks.")
     parser.add_argument("--basename", help="Override the output basename.")
+    parser.add_argument(
+        "--allow-warnings",
+        action="store_true",
+        help="Explicitly allow a build with validation warnings; errors always block.",
+    )
     return parser.parse_args(argv)
 
 
@@ -559,6 +566,19 @@ def main(argv: list[str] | None = None) -> int:
         )
         for finding in validation["findings"]:
             if finding["severity"] == "error":
+                print(
+                    f"  {finding['code']} {finding['path']}: {finding['message']}",
+                    file=sys.stderr,
+                )
+        return 1
+    if validation["summary"]["warnings"] and not args.allow_warnings:
+        print(
+            f"ERROR: spec has {validation['summary']['warnings']} validation warning(s); "
+            "review them or pass --allow-warnings explicitly.",
+            file=sys.stderr,
+        )
+        for finding in validation["findings"]:
+            if finding["severity"] == "warning":
                 print(
                     f"  {finding['code']} {finding['path']}: {finding['message']}",
                     file=sys.stderr,
@@ -597,7 +617,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     report = {
-        "builder": "minius_codex_lab-verifiable-document/1.0.0-beta.1",
+        "builder": f"minius_codex_lab-verifiable-document/{package_version()}",
         "built_at_utc": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "spec": str(spec_path),
         "valid": not link_errors,

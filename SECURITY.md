@@ -7,7 +7,8 @@ the latest published pre-release only.
 
 | Version | Supported |
 |---|---|
-| `1.0.0-beta.1` | Yes |
+| `1.0.0-beta.2` | Yes |
+| `1.0.0-beta.1` | No; superseded because of metadata/bootstrap defects |
 | Internal seed versions | No |
 
 This project is independent and provides no warranty of legal correctness.
@@ -62,7 +63,9 @@ python3 scripts/check_repo_safety.py --profile upstream-public
 Before using an installed local workspace:
 
 ```bash
+python3 scripts/validate_workspace.py --mode runtime
 python3 scripts/check_repo_safety.py --profile workspace-local
+python3 scripts/init_workspace.py --memory-mode untracked
 ```
 
 The `workspace-private` profile may verify private remote visibility, but it

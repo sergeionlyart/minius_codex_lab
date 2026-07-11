@@ -20,6 +20,7 @@ try:
         ALLOWED_VERIFICATION_STATUS,
         iter_claims,
         load_json,
+        package_version,
         resolve_local_path,
         sha256_file,
         sha256_text,
@@ -33,6 +34,7 @@ except ImportError:  # Direct script execution.
         ALLOWED_VERIFICATION_STATUS,
         iter_claims,
         load_json,
+        package_version,
         resolve_local_path,
         sha256_file,
         sha256_text,
@@ -293,11 +295,10 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
                 if Path(local_path).is_absolute():
                     _add(
                         findings,
-                        "warning",
+                        "error",
                         "absolute_local_path",
                         f"{source_path}/local_path",
-                        "Avoid publishing absolute local paths; use a "
-                        "repository-relative reference.",
+                        "Absolute local paths are forbidden; use a repository-relative reference.",
                     )
                 resolved_path = resolve_local_path(spec_path, local_path)
                 if not resolved_path.exists():
@@ -365,6 +366,17 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
                     unit_path,
                     "Page-image evidence units require a page locator.",
                 )
+            if (
+                inclusion_mode == "page-image-evidence"
+                and unit.get("verification_status") != "human-verified"
+            ):
+                _add(
+                    findings,
+                    "error",
+                    "scan_human_verification_required",
+                    unit_path,
+                    "Page-image/OCR evidence must be verified by a human before use.",
+                )
             units[unit_id] = (source, unit, unit_path)
 
     for duplicate in _duplicate_values(source_ids):
@@ -412,7 +424,7 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
         if claim.get("material") is True and evidence_refs and verified_support == 0:
             _add(
                 findings,
-                "warning",
+                "error",
                 "material_claim_without_human_verified_unit",
                 claim_path,
                 "No supporting unit is marked human-verified.",
@@ -439,7 +451,7 @@ def validate_spec(spec: dict[str, Any], spec_path: Path) -> dict[str, Any]:
     warnings = [finding for finding in findings if finding.severity == "warning"]
     validated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return {
-        "validator": "minius_codex_lab-verifiable-document/1.0.0-beta.1",
+        "validator": f"minius_codex_lab-verifiable-document/{package_version()}",
         "validated_at_utc": validated_at,
         "spec_path": str(spec_path),
         "valid": not errors,

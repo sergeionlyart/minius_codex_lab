@@ -1,2 +1,5 @@
-# Runtime validation dependency for memory/index.yaml and future YAML configuration.
-PyYAML>=6.0.2,<7
+# Bounded runtime dependencies for strict validation and synthetic HTML/DOCX gates.
+PyYAML==6.0.3
+jsonschema==4.23.0
+pypdf==5.0.0
+python-docx==1.1.0

@@ -10,6 +10,11 @@ from pathlib import Path
 
 from scripts import build_release, check_repo_safety
 
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_VERSION = json.loads((SOURCE_ROOT / "PACKAGE_MANIFEST.json").read_text(encoding="utf-8"))[
+    "version"
+]
+
 
 def _write(root: Path, relative: str, content: str = "fixture\n") -> None:
     path = root / relative
@@ -22,10 +27,10 @@ def _project_manifest() -> dict[str, object]:
         "schema_version": 1,
         "project": build_release.PROJECT_NAME,
         "package": build_release.PACKAGE_NAME,
-        "version": build_release.CURRENT_VERSION,
+        "version": SOURCE_VERSION,
         "layout": "workspace-template-overlay",
         "default_source_date_epoch": 1783771200,
-        "release_asset": (f"{build_release.PACKAGE_NAME}-v{build_release.CURRENT_VERSION}.zip"),
+        "release_asset": (f"{build_release.PACKAGE_NAME}-v{SOURCE_VERSION}.zip"),
         "payload_mappings": [
             {"source": source, "target": target}
             for source, target in build_release.EXPECTED_MAPPINGS
@@ -42,13 +47,29 @@ def _create_repository(root: Path) -> None:
     _write(root, "workspace-template/AGENTS.md", "runtime instructions\n")
     _write(root, "workspace-template/README.md", "runtime readme\n")
     _write(root, "workspace-template/requirements.txt", "PyYAML>=6.0.2,<7\n")
+    _write(root, "workspace-template/docs/CODEX_SMOKE_TEST.md", "synthetic smoke test\n")
+    _write(
+        root,
+        "workspace-template/docs/INSTALL_WINDOWS_POWERSHELL.md",
+        "synthetic Windows instructions\n",
+    )
     _write(root, "workspace-template/.codex/config.toml", "sandbox_mode = 'workspace-write'\n")
     _write(root, "workspace-template/.codex/hooks.json", '{"hooks": {}}\n')
     _write(root, "workspace-template/matters/_template/MATTER.md", "{{MATTER_ID}} {{TITLE}}\n")
     _write(root, "workspace-template/memory/CURRENT.md", "No active matter.\n")
     _write(
         root,
+        "workspace-template/scripts/init_workspace.py",
+        "#!/usr/bin/env python3\nprint('fixture')\n",
+    )
+    _write(
+        root,
         "workspace-template/scripts/new_matter.py",
+        "#!/usr/bin/env python3\nprint('fixture')\n",
+    )
+    _write(
+        root,
+        "workspace-template/scripts/run_synthetic_e2e.py",
         "#!/usr/bin/env python3\nprint('fixture')\n",
     )
     _write(root, ".agents/skills/example/SKILL.md", "---\nname: example\ndescription: test\n---\n")
@@ -87,7 +108,7 @@ class BuildReleaseTests(unittest.TestCase):
         return build_release.build_release(
             self.root,
             self.root / output_name,
-            build_release.CURRENT_VERSION,
+            SOURCE_VERSION,
             1783771200,
             run_external_checks=False,
         )
@@ -107,9 +128,7 @@ class BuildReleaseTests(unittest.TestCase):
 
     def test_embedded_manifest_and_checksums_describe_the_exact_set(self) -> None:
         result = self.build()
-        manifest = build_release.verify_zip_archive(
-            result.archive, expected_version=build_release.CURRENT_VERSION
-        )
+        manifest = build_release.verify_zip_archive(result.archive, expected_version=SOURCE_VERSION)
         with zipfile.ZipFile(result.archive) as archive:
             names = set(archive.namelist())
             declared = {record["path"] for record in manifest["files"]}
@@ -123,6 +142,30 @@ class BuildReleaseTests(unittest.TestCase):
             self.assertEqual(set(checksums), declared | {build_release.PROJECT_MANIFEST})
         expected_sha_line = f"{result.sha256}  {result.archive.name}\n"
         self.assertEqual(result.checksum_file.read_text(encoding="utf-8"), expected_sha_line)
+
+    def test_deterministic_spdx_sbom_describes_payload_and_dependencies(self) -> None:
+        result = self.build()
+        sbom = json.loads(result.sbom_file.read_text(encoding="utf-8"))
+        self.assertEqual(sbom["spdxVersion"], "SPDX-2.3")
+        self.assertEqual(sbom["dataLicense"], "CC0-1.0")
+        project = next(
+            package for package in sbom["packages"] if package["name"] == build_release.PACKAGE_NAME
+        )
+        self.assertEqual(project["versionInfo"], SOURCE_VERSION)
+        self.assertEqual(project["checksums"][0]["checksumValue"], result.sha256)
+        dependency_names = {package["name"] for package in sbom["packages"]} - {
+            build_release.PACKAGE_NAME
+        }
+        self.assertEqual(dependency_names, {"PyYAML"})
+        with zipfile.ZipFile(result.archive) as archive:
+            payload_names = set(archive.namelist()) - {
+                build_release.PROJECT_MANIFEST,
+                build_release.CHECKSUMS_FILE,
+            }
+        self.assertEqual(
+            {item["fileName"].removeprefix("./") for item in sbom["files"]},
+            payload_names,
+        )
 
     def test_permissions_and_timestamps_are_normalized(self) -> None:
         result = self.build()
@@ -138,16 +181,18 @@ class BuildReleaseTests(unittest.TestCase):
         second = self.build("second")
         self.assertEqual(first.sha256, second.sha256)
         self.assertEqual(first.archive.read_bytes(), second.archive.read_bytes())
+        self.assertEqual(first.sbom_file.read_bytes(), second.sbom_file.read_bytes())
 
         checked = build_release.build_release(
             self.root,
             self.root / "checked",
-            build_release.CURRENT_VERSION,
+            SOURCE_VERSION,
             1783771200,
             check_reproducibility=True,
             run_external_checks=False,
         )
         self.assertEqual(first.sha256, checked.sha256)
+        self.assertEqual(first.sbom_file.read_bytes(), checked.sbom_file.read_bytes())
 
     def test_zip_safety_rejects_traversal_duplicate_and_symlink(self) -> None:
         cases = ("traversal", "duplicate", "symlink")

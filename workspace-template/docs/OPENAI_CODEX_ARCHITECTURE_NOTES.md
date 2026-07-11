@@ -45,11 +45,21 @@ Codex читает инструкции проекта по пути от кор
 
 Живой поиск включается осознанным запуском `codex --search` после классификации и очистки запроса.
 
+`init_workspace.py` не выдаёт trust автоматически. Пользователь сначала
+просматривает `.codex/`, затем принимает project trust через доступный UI
+Codex. В недоверенном проекте project config, rules и hooks могут быть
+пропущены.
+
 Официальная документация: `https://developers.openai.com/codex/config-reference`.
 
 ## 5. Hooks: чтение памяти и предупреждение, но не автономные side effects
 
 `SessionStart` читает только `memory/CURRENT.md` и `memory/OPEN_QUESTIONS.md` и передает краткий operational context. `Stop` проверяет Git-состояние и предупреждает о незавершенном handoff. Hooks не делают commit, push, сетевых запросов или удаления файлов.
+
+Project trust и trust точного определения hook — отдельные gates. Команда
+`/hooks` должна показать текущие `SessionStart` и `Stop`; изменение их hash
+требует новой проверки. Статическая валидация файлов не доказывает trust или
+execution.
 
 Официальная документация: `https://developers.openai.com/codex/hooks`.
 

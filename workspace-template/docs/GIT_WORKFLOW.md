@@ -1,10 +1,31 @@
 # Git как операционная память
 
+## 0. Инициализация и режим хранения
+
+Чистый release workspace сначала проверяется как неизменённый payload, затем
+инициализируется только штатным скриптом:
+
+```bash
+python scripts/validate_workspace.py --mode runtime
+python scripts/init_workspace.py --memory-mode untracked
+```
+
+`runtime` — integrity gate только до начала работы. После первого commit
+используйте `--mode operational`.
+
+Режим `untracked` не помещает реальные matters и mutable memory в Git.
+`local-git` разрешает их явный локальный stage/commit. `private-approved`
+требует отдельного организационного решения и флага
+`--acknowledge-private-approved`; remote всё равно не создаётся автоматически.
+Режим нельзя неявно менять повторным запуском initializer.
+
 ## 1. Ветки и worktrees
 
 - `main` — reviewed durable state.
 - `session/YYYYMMDD-<slug>` — одна исследовательская сессия/поток.
 - Для нескольких параллельных чатов создавай отдельные worktrees, чтобы они не редактировали одни и те же файлы.
+- Worktree с matter доступен только в tracked-режиме после явного commit этого
+  matter. В `untracked` используйте branch в текущем рабочем каталоге.
 
 Пример:
 
@@ -49,19 +70,21 @@ memory: hand off case-law session with unresolved sample limitation
 
 ## 5. Handoff
 
-Перед первой валидацией создайте Python 3.11 virtual environment и установите
-ограниченную runtime-зависимость командой
-`python -m pip install -r requirements.txt`.
+Создайте Python 3.11 virtual environment и установите ограниченную
+runtime-зависимость командой `python -m pip install -r requirements.txt`.
 
 Перед завершением:
 
 ```bash
 git status --short --branch
 git diff --check
-python3 scripts/validate_workspace.py --mode runtime
+python3 scripts/validate_workspace.py --mode operational
+python3 scripts/check_repo_safety.py --profile workspace-local
 ```
 
-Обнови session note и при необходимости CURRENT. Покажи commit IDs и unresolved risks.
+Обнови session note и при необходимости CURRENT. В tracked-режиме stage только
+названные пути после classification review. Покажи commit IDs и unresolved
+risks. Скрипты lifecycle не выполняют commit или push.
 
 ## 6. Remote
 

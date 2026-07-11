@@ -72,6 +72,16 @@ PUBLIC_SCRATCH_ROOTS = {
 }
 PUBLIC_RUNTIME_ROOTS = {"artifacts", "logs", "memory", "outputs"}
 PUBLIC_SYNTHETIC_FILES: frozenset[str] = frozenset()
+IGNORED_LOCAL_PATH_PARTS = {
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tmp",
+    ".venv",
+    "__pycache__",
+    "venv",
+}
 WORKSPACE_TEMPLATE_FILES = frozenset(
     {
         ".codex/config.toml",
@@ -87,6 +97,8 @@ WORKSPACE_TEMPLATE_FILES = frozenset(
         "SECURITY.md",
         "artifacts/README.md",
         "docs/GIT_WORKFLOW.md",
+        "docs/CODEX_SMOKE_TEST.md",
+        "docs/INSTALL_WINDOWS_POWERSHELL.md",
         "docs/LEGAL_SOURCE_HIERARCHY.md",
         "docs/LEGAL_WORKFLOW_LEVELS.md",
         "docs/OPENAI_CODEX_ARCHITECTURE_NOTES.md",
@@ -129,7 +141,9 @@ WORKSPACE_TEMPLATE_FILES = frozenset(
         "memory/templates/session.md",
         "requirements.txt",
         "scripts/finish_session.py",
+        "scripts/init_workspace.py",
         "scripts/new_matter.py",
+        "scripts/run_synthetic_e2e.py",
         "scripts/start_session.py",
     }
 )
@@ -302,7 +316,7 @@ def _filesystem_candidates(root: Path) -> list[Candidate]:
     candidates: list[Candidate] = []
     for path in root.rglob("*"):
         relative_path = path.relative_to(root)
-        if ".git" in relative_path.parts:
+        if set(relative_path.parts) & IGNORED_LOCAL_PATH_PARTS:
             continue
         try:
             if stat.S_ISDIR(path.lstat().st_mode):

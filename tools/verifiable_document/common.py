@@ -55,6 +55,20 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def package_version() -> str:
+    """Read the canonical version from the nearest package manifest."""
+    for directory in Path(__file__).resolve().parents:
+        manifest = directory / "PACKAGE_MANIFEST.json"
+        if not manifest.is_file():
+            continue
+        value = load_json(manifest)
+        version = value.get("version")
+        if isinstance(version, str) and version.strip():
+            return version
+        raise ValueError(f"Manifest version is invalid: {manifest}")
+    raise ValueError("PACKAGE_MANIFEST.json was not found above the document tool.")
+
+
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as stream:

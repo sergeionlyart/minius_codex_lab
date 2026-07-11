@@ -27,6 +27,20 @@ def _run(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _workspace_mode(root: Path) -> str | None:
+    git_root = _run(root, "git", "rev-parse", "--show-toplevel")
+    initialized = _run(root, "git", "config", "--local", "--get", "minius.initialized")
+    mode = _run(root, "git", "config", "--local", "--get", "minius.memoryMode")
+    if (
+        git_root.returncode != 0
+        or Path(git_root.stdout.strip()).resolve() != root.resolve()
+        or initialized.stdout.strip() != "true"
+    ):
+        return None
+    value = mode.stdout.strip()
+    return value if value in {"untracked", "local-git", "private-approved"} else None
+
+
 def _find_session(root: Path, query: str) -> Path:
     sessions_root = (root / "memory/sessions").resolve()
     direct = Path(query)
@@ -133,6 +147,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = _root()
+    memory_mode = _workspace_mode(root)
+    if memory_mode is None:
+        print(
+            "ERROR: initialize this release with scripts/init_workspace.py first.",
+            file=sys.stderr,
+        )
+        return 2
     try:
         session_path = _find_session(root, args.session)
     except ValueError as error:
@@ -186,10 +207,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"closed session: {session_id}")
     print(f"session log: {session_path}")
     print("No commit or push was executed.")
-    print("recommended final commits, as applicable:")
-    print("  source:/research:/evidence:/draft:/review:/artifact: <completed work package>")
-    print(f"  memory: close session {session_id}")
-    print("Review git status and run tests before committing.")
+    if memory_mode == "untracked":
+        print("Git mode: untracked; session handoff remains local and ignored.")
+    else:
+        print("After classification review, create only applicable explicit commits:")
+        print("  source:/research:/evidence:/draft:/review:/artifact: <work package>")
+        print(f"  memory: close session {session_id}")
+        print("Review git status, stage named paths, and run tests before committing.")
     return 0
 
 

@@ -1,6 +1,10 @@
 ---
 name: redaction-and-disclosure
-description: Классифицируй, минимизируй и подготовь материалы к веб-поиску, внешнему репо или выдаче: redaction, metadata, secrets, personal/restricted data и disclosure log. Используй перед внешним действием; не используй как замену human approval и не понижай класс данных.
+description: >-
+  Классифицируй, минимизируй и подготовь материалы к веб-поиску, внешнему репо
+  или выдаче: redaction, metadata, secrets, personal/restricted data и
+  disclosure log. Используй перед внешним действием; не используй как замену
+  human approval и не понижай класс данных.
 ---
 
 # Redaction и допустимость раскрытия

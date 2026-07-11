@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import subprocess
 import sys
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -17,6 +18,44 @@ def _root() -> Path:
 
 def _utc_now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _workspace_mode(root: Path) -> str | None:
+    try:
+        git_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=root,
+            check=False,
+            text=True,
+            capture_output=True,
+            timeout=10,
+        )
+        initialized = subprocess.run(
+            ["git", "config", "--local", "--get", "minius.initialized"],
+            cwd=root,
+            check=False,
+            text=True,
+            capture_output=True,
+            timeout=10,
+        )
+        mode = subprocess.run(
+            ["git", "config", "--local", "--get", "minius.memoryMode"],
+            cwd=root,
+            check=False,
+            text=True,
+            capture_output=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if (
+        git_root.returncode != 0
+        or Path(git_root.stdout.strip()).resolve() != root.resolve()
+        or initialized.stdout.strip() != "true"
+    ):
+        return None
+    value = mode.stdout.strip()
+    return value if value in {"untracked", "local-git", "private-approved"} else None
 
 
 def _replace_placeholders(directory: Path, values: dict[str, str]) -> None:
@@ -97,6 +136,13 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     root = _root()
+    memory_mode = _workspace_mode(root)
+    if memory_mode is None:
+        print(
+            "ERROR: initialize this release with scripts/init_workspace.py first.",
+            file=sys.stderr,
+        )
+        return 2
     template = root / "matters/_template"
     target = root / "matters" / matter_id
     if not template.is_dir():
@@ -139,7 +185,14 @@ def main(argv: list[str] | None = None) -> int:
             "NOTICE: external search, export, and remote push require a separate "
             "disclosure decision."
         )
-    print(f"recommended commit: matter: initialize {matter_id}")
+    if memory_mode == "untracked":
+        print("Git mode: untracked; matter and mutable memory remain local and ignored.")
+    else:
+        print("Review classification, then stage explicitly if storage is approved:")
+        print(f"  git add -- matters/{matter_id} memory")
+        print(f'  git commit -m "matter: initialize {matter_id}"')
+        if memory_mode == "private-approved":
+            print("A private remote still requires a separate safety check before push.")
     return 0
 
 
