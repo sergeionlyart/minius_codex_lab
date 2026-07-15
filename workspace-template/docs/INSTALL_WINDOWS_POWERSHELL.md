@@ -6,7 +6,7 @@
 ## Проверка архива
 
 ```powershell
-$Zip = ".\minius_codex_lab-workspace-v1.0.0-beta.2.zip"
+$Zip = ".\minius_codex_lab-workspace-v1.1.0-beta.1.zip"
 $Expected = (Get-Content "$Zip.sha256").Split()[0].ToLowerInvariant()
 $Actual = (Get-FileHash $Zip -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($Actual -ne $Expected) { throw "SHA-256 mismatch" }

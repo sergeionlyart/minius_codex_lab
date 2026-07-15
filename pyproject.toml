@@ -1,6 +1,6 @@
 [project]
 name = "minius_codex_lab"
-version = "1.0.0-beta.2"
+version = "1.1.0-beta.1"
 description = "Open-source Codex workspace for evidence-grounded legal work"
 requires-python = ">=3.11"
 

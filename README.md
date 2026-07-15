@@ -234,35 +234,36 @@ minius_codex_lab/
 
 Перейдіть до [GitHub Releases](https://github.com/sergeionlyart/minius_codex_lab/releases) і завантажте файли актуального релізу.
 
-Для `v1.0.0-beta.2`:
+Для `v1.1.0-beta.1`:
 
 ```text
-minius_codex_lab-workspace-v1.0.0-beta.2.zip
-minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
-minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json
+minius_codex_lab-workspace-v1.1.0-beta.1.zip
+minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
+minius_codex_lab-workspace-v1.1.0-beta.1.spdx.json
 ```
 
-Не використовуйте `v1.0.0-beta.1`: цей випуск замінено виправленим `beta.2`.
+`v1.1.0-beta.1` замінює попередній `v1.0.0-beta.2`. Не використовуйте
+`v1.0.0-beta.1`: він має відомі дефекти metadata/bootstrap.
 
 ## 2. Перевірте SHA-256
 
 ### Linux
 
 ```bash
-sha256sum -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+sha256sum -c minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
 ```
 
 ### macOS
 
 ```bash
-shasum -a 256 -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+shasum -a 256 -c minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
 ```
 
 ### Windows PowerShell
 
 ```powershell
 Get-FileHash `
-  .\minius_codex_lab-workspace-v1.0.0-beta.2.zip `
+  .\minius_codex_lab-workspace-v1.1.0-beta.1.zip `
   -Algorithm SHA256
 ```
 

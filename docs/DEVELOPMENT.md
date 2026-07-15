@@ -8,7 +8,7 @@
   acceptable);
 - optional Codex CLI for runtime integration checks.
 
-The `beta.2` candidate has a sanitized local record for Codex
+The historical `1.0.0-beta.2` candidate has a sanitized local record for Codex
 `0.144.0-alpha.4`; it is one compatibility point, not a universal support
 claim. Record the exact version and result for every additional environment.
 
