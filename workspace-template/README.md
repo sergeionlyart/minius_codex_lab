@@ -12,7 +12,7 @@
 
 ## Что входит
 
-- 12 project skills в `.agents/skills/`;
+- 13 project skills в `.agents/skills/`;
 - 10 специализированных ролей в `.codex/agents/`;
 - безопасные defaults, два прозрачных hook и command rules в `.codex/`;
 - три явных режима хранения matters/memory;
@@ -107,7 +107,7 @@ git diff HEAD -- .codex AGENTS.md .agents/skills
 2. Выполните `/hooks`: должны быть видны project hooks `SessionStart` и `Stop`.
    Доверьте только показанные определения; изменение hook требует новой
    проверки.
-3. Начните новую сессию и выполните `/skills`: все 12 project skills должны
+3. Начните новую сессию и выполните `/skills`: все 13 project skills должны
    присутствовать; пользовательские skills могут увеличить общий список.
 4. Через `/agent` проверьте project roles и выполните только синтетические
    вызовы из `docs/CODEX_SMOKE_TEST.md`.

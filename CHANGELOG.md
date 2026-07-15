@@ -3,6 +3,15 @@
 All notable public changes are documented here. The project follows Semantic
 Versioning while pre-release compatibility remains explicitly limited.
 
+## [Unreleased]
+
+### Added
+
+- Added the `format-monitoring-report` skill with a machine-readable visual
+  contract, exact seven-section skeleton, safe authoring guidance, and
+  synthetic contract tests. The skill formats approved content only and
+  explicitly excludes research methodology and legal analysis.
+
 ## [1.0.0-beta.2] - 2026-07-11
 
 ### Fixed

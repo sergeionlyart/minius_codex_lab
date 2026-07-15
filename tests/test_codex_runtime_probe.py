@@ -90,7 +90,7 @@ def _thread_payload(root: Path) -> dict[str, Any]:
 def test_runtime_payload_validators_accept_exact_inventory(tmp_path: Path) -> None:
     root = tmp_path.resolve()
 
-    assert probe._validate_skills(_skill_payload(root), root)["count"] == 12
+    assert probe._validate_skills(_skill_payload(root), root)["count"] == 13
     assert probe._validate_hooks(_hook_payload(root), root)["events"] == [
         "sessionStart",
         "stop",
