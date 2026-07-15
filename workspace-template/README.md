@@ -1,6 +1,6 @@
 # Юридическая рабочая среда minius_codex_lab
 
-Версия: **1.0.0-beta.2**
+Версия: **1.1.0-beta.1**
 
 Статус: **beta для тестирования на синтетических данных**
 
@@ -12,7 +12,7 @@
 
 ## Что входит
 
-- 12 project skills в `.agents/skills/`;
+- 13 project skills в `.agents/skills/`;
 - 10 специализированных ролей в `.codex/agents/`;
 - безопасные defaults, два прозрачных hook и command rules в `.codex/`;
 - три явных режима хранения matters/memory;
@@ -24,8 +24,8 @@
 
 Скачайте из GitHub Release:
 
-- `minius_codex_lab-workspace-v1.0.0-beta.2.zip`;
-- `minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256`.
+- `minius_codex_lab-workspace-v1.1.0-beta.1.zip`;
+- `minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256`.
 
 Проверьте SHA-256 по release notes и распакуйте ZIP в **новый автономный
 каталог**, который не находится внутри другого Git-репозитория. Не
@@ -107,7 +107,7 @@ git diff HEAD -- .codex AGENTS.md .agents/skills
 2. Выполните `/hooks`: должны быть видны project hooks `SessionStart` и `Stop`.
    Доверьте только показанные определения; изменение hook требует новой
    проверки.
-3. Начните новую сессию и выполните `/skills`: все 12 project skills должны
+3. Начните новую сессию и выполните `/skills`: все 13 project skills должны
    присутствовать; пользовательские skills могут увеличить общий список.
 4. Через `/agent` проверьте project roles и выполните только синтетические
    вызовы из `docs/CODEX_SMOKE_TEST.md`.

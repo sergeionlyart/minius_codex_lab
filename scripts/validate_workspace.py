@@ -121,6 +121,7 @@ READ_ONLY_ROLES = {
 EXPECTED_SKILL_NAMES = {
     "case-law-analysis",
     "eu-acquis-analysis",
+    "format-monitoring-report",
     "legal-drafting",
     "legal-monitoring",
     "legal-qa-audit",

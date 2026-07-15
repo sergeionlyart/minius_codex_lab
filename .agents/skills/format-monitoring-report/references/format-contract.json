@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "profile": "blue-band-monitoring-report",
+  "scope": {
+    "content_generation": "excluded",
+    "methodology": "excluded",
+    "visual_formatting": "required"
+  },
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "width_twips": 11906,
+    "height_twips": 16838,
+    "margins_twips": {
+      "left": 1417,
+      "right": 850,
+      "top": 850,
+      "bottom": 850
+    },
+    "header_distance_twips": 708,
+    "footer_distance_twips": 708,
+    "different_first_page": true
+  },
+  "palette": {
+    "accent": "#4F81BD",
+    "body_text": "#000000",
+    "inverse_text": "#FFFFFF",
+    "link": "#0000FF",
+    "border": "#000000"
+  },
+  "styles": {
+    "title_band": {
+      "container": "single_cell_table",
+      "width_twips": 9855,
+      "fill": "#4F81BD",
+      "border_color": "#000000",
+      "border_width_pt": 0.5,
+      "font": "Times New Roman",
+      "font_size_pt": 14,
+      "bold": true,
+      "font_color": "#FFFFFF",
+      "alignment": "center",
+      "line_spacing": 1.15,
+      "pattern": "Проблема № [номер]. [НАЗВА]"
+    },
+    "section_band": {
+      "container": "single_cell_table",
+      "width_twips": 9855,
+      "fill": "#4F81BD",
+      "border_color": "#000000",
+      "border_width_pt": 0.5,
+      "font": "Times New Roman",
+      "font_size_pt": 14,
+      "bold": true,
+      "font_color": "#FFFFFF",
+      "alignment": "left",
+      "keep_with_next": true
+    },
+    "body": {
+      "font": "Times New Roman",
+      "font_size_pt": 14,
+      "font_color": "#000000",
+      "alignment": "justified",
+      "first_line_indent_twips": 567,
+      "line_spacing": 1.0,
+      "space_before_pt": 0,
+      "space_after_pt": 0
+    },
+    "summary": {
+      "based_on": "body",
+      "bold": true
+    },
+    "subheading": {
+      "based_on": "body",
+      "italic": true,
+      "alignment": "left",
+      "topics": "supplied_by_author_only"
+    },
+    "footnote": {
+      "kind": "native_word_footnote",
+      "font": "Times New Roman",
+      "font_size_pt": 10,
+      "url_color": "#0000FF",
+      "url_underline": true
+    },
+    "page_number": {
+      "field": "PAGE",
+      "font": "Times New Roman",
+      "font_size_pt": 12,
+      "alignment": "right",
+      "first_page": "omitted"
+    },
+    "comparison_table": {
+      "font": "Times New Roman",
+      "font_size_pt": 12,
+      "width_twips": 9855,
+      "column_widths_twips": [
+        674,
+        4662,
+        4519
+      ],
+      "border_color": "#000000",
+      "border_width_pt": 0.5,
+      "header_bold": true,
+      "header_alignment": "center",
+      "repeat_header": true,
+      "fixed_row_height": false,
+      "text_wrapping": true
+    }
+  },
+  "required_sections": [
+    {
+      "order": 1,
+      "id": "problem",
+      "heading": "Проблема"
+    },
+    {
+      "order": 2,
+      "id": "legal_regulation",
+      "heading": "Стан нормативно-правового регулювання"
+    },
+    {
+      "order": 3,
+      "id": "implementation_practice",
+      "heading": "Практика реалізації та/або застосування нормативно-правових актів"
+    },
+    {
+      "order": 4,
+      "id": "survey_results",
+      "heading": "Результати проведеного опитування"
+    },
+    {
+      "order": 5,
+      "id": "international_experience",
+      "heading": "Міжнародний досвід"
+    },
+    {
+      "order": 6,
+      "id": "research_materials",
+      "heading": "Науково-дослідні матеріали"
+    },
+    {
+      "order": 7,
+      "id": "conclusions_and_proposals",
+      "heading": "Висновки та пропозиції"
+    }
+  ],
+  "terminal_component": {
+    "id": "comparison_table",
+    "parent_section": "conclusions_and_proposals",
+    "required_by_template": true,
+    "columns": [
+      "№",
+      "Чинна редакція",
+      "Запропонована редакція"
+    ],
+    "omit_only_when": "explicitly_authorized_by_user",
+    "missing_content_policy": "stop_without_fabricating"
+  },
+  "document_rules": {
+    "header": "empty",
+    "toc": "absent",
+    "cover_page": "absent",
+    "fixed_page_count": false,
+    "official_branding": "forbidden_by_default",
+    "metadata": "scrub_personal_and_source_metadata"
+  }
+}

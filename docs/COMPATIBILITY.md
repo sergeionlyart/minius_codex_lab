@@ -2,26 +2,31 @@
 
 ## Support statement
 
-Python **3.11** is the documented runtime for `1.0.0-beta.2`. A row is a
+Python **3.11** is the documented runtime for `1.1.0-beta.1`. A row is a
 support claim only when it records a factual run on the release commit or
 asset. File presence and static parsing do not prove Codex activation.
 
-| Component | beta.2 status |
+| Component | 1.1.0-beta.1 candidate status |
 |---|---|
-| Python 3.11 | Candidate quality gates PASS; release-tag workflow repeats them before publication |
-| Ubuntu 24.04 | Candidate lifecycle PASS |
-| macOS 15 runner | Candidate lifecycle PASS |
-| Windows 2025 runner | Candidate lifecycle PASS |
+| Python 3.11 | Local candidate quality gates PASS; release-tag workflow repeats them before publication |
+| Ubuntu 24.04 | Pull-request and release-tag lifecycle required before publication |
+| macOS 15 runner | Pull-request and release-tag lifecycle required before publication |
+| Windows 2025 runner | Pull-request and release-tag lifecycle required before publication |
 | HTML output | Synthetic links, anchors and hashes pass locally |
-| DOCX output | Synthetic bookmarks and links pass technically; Microsoft Word visual QA not verified |
-| Codex CLI | Local candidate smoke recorded below |
+| DOCX output | Synthetic bookmarks, links, and format-contract tests pass technically; Microsoft Word visual QA not verified |
+| Codex CLI | Historical beta.2 smoke recorded below; fresh third-party 1.1 record required |
 | Persisted project/hook trust in a user UI | **NOT VERIFIED**; mandatory third-party step |
+
+The `1.1.0-beta.1` candidate adds a thirteenth project skill for the visual
+format and seven-section skeleton of monitoring reports. It does not bundle
+the source document and does not claim a fresh interactive Codex or Microsoft
+Word visual-compatibility result.
 
 The earlier Ubuntu run for `beta.1` proved only its then-current CI. It does not
 establish `beta.2` compatibility because the old validator did not parse skill
 frontmatter as strict YAML.
 
-## Cross-platform candidate record
+## Historical beta.2 cross-platform record
 
 The functional candidate at commit
 `5ca24e74954d14f19ef88c9c2fa0370796d2820a` passed the complete
@@ -39,7 +44,7 @@ passed both Python and Actions analysis. This evidence-record update changes no
 runtime payload. The exact release tag still repeats all gates and all three OS
 lifecycle jobs before it may publish assets.
 
-## Local Codex candidate record
+## Historical beta.2 local Codex record
 
 Sanitized factual run on 2026-07-11:
 
@@ -66,7 +71,8 @@ project trust and exact hook trust through their Codex UI. The role run
 completed, but the recorded thread-store warnings remain a compatibility note
 for this alpha CLI.
 
-The repeatable no-model metadata/config/rules probe also passed all 12 checks:
+The repeatable no-model metadata/config/rules probe validates the current exact
+13-skill inventory together with config, hooks, rules, and clean Git state:
 
 ```bash
 python3 scripts/codex_runtime_probe.py \
@@ -87,7 +93,7 @@ Follow the extracted `docs/CODEX_SMOKE_TEST.md` and report:
 ```text
 tested_at_utc, release_tag, asset_sha256, initial_commit,
 os_version_arch, python_version, git_version, codex_version,
-project_trust, skills_expected_12, roles_privacy_and_drafter,
+project_trust, skills_expected_13, roles_privacy_and_drafter,
 hooks_discovered_2, hooks_trusted_and_executed, rules_4_cases,
 html_docx_synthetic, result, residual_notes
 ```

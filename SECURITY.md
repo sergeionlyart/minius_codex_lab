@@ -7,7 +7,8 @@ the latest published pre-release only.
 
 | Version | Supported |
 |---|---|
-| `1.0.0-beta.2` | Yes |
+| `1.1.0-beta.1` | Yes |
+| `1.0.0-beta.2` | No; superseded by the latest minor pre-release |
 | `1.0.0-beta.1` | No; superseded because of metadata/bootstrap defects |
 | Internal seed versions | No |
 

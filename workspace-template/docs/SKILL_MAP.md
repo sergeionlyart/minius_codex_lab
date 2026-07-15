@@ -7,6 +7,7 @@
 | `$ukrainian-legal-research` | действующее право Украины | applicable rule/version synthesis |
 | `$case-law-analysis` | вывод о практике | protocol, corpus, holdings, limits |
 | `$legal-monitoring` | полный L3 monitoring | passport, theory, causal/root-cause/recommendations |
+| `$format-monitoring-report` | готовое содержание мониторинга нужно оформить | DOCX/PDF по семисекционному визуальному шаблону |
 | `$eu-acquis-analysis` | ЕС/ЕСПЧ/сравнение | legal status, gap/adaptation matrix |
 | `$quantitative-impact-analysis` | статистика/impact | indicator dictionary, reproducible analysis |
 | `$legal-drafting` | evidence gate пройден | memo/opinion/draft/report with claims |
@@ -31,4 +32,4 @@
 
 ### Мониторинг L3
 
-`matter-intake → legal-monitoring orchestration → UA/practice/data/EU modules → causal/root cause → drafting → independent audit → verifiable document`
+`matter-intake → legal-monitoring orchestration → UA/practice/data/EU modules → causal/root cause → drafting → independent audit → format-monitoring-report → verifiable document`

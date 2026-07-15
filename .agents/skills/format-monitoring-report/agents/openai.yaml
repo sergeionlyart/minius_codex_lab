@@ -1,0 +1,4 @@
+interface:
+  display_name: "Формат отчёта мониторинга"
+  short_description: "Оформляет отчёт мониторинга по утверждённому шаблону"
+  default_prompt: "Use $format-monitoring-report to format approved content as a monitoring report with the required seven-section structure."

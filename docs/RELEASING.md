@@ -16,9 +16,9 @@ The single canonical machine-readable version source is:
 For the current manifest version, the assets are:
 
 ```text
-minius_codex_lab-workspace-v1.0.0-beta.2.zip
-minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
-minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json
+minius_codex_lab-workspace-v1.1.0-beta.1.zip
+minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
+minius_codex_lab-workspace-v1.1.0-beta.1.spdx.json
 ```
 
 ## Pre-tag checklist

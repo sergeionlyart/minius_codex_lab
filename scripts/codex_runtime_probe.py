@@ -22,6 +22,7 @@ from typing import Any, TextIO
 EXPECTED_SKILLS = (
     "case-law-analysis",
     "eu-acquis-analysis",
+    "format-monitoring-report",
     "legal-drafting",
     "legal-monitoring",
     "legal-qa-audit",

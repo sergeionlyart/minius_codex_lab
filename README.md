@@ -234,35 +234,36 @@ minius_codex_lab/
 
 Перейдіть до [GitHub Releases](https://github.com/sergeionlyart/minius_codex_lab/releases) і завантажте файли актуального релізу.
 
-Для `v1.0.0-beta.2`:
+Для `v1.1.0-beta.1`:
 
 ```text
-minius_codex_lab-workspace-v1.0.0-beta.2.zip
-minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
-minius_codex_lab-workspace-v1.0.0-beta.2.spdx.json
+minius_codex_lab-workspace-v1.1.0-beta.1.zip
+minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
+minius_codex_lab-workspace-v1.1.0-beta.1.spdx.json
 ```
 
-Не використовуйте `v1.0.0-beta.1`: цей випуск замінено виправленим `beta.2`.
+`v1.1.0-beta.1` замінює попередній `v1.0.0-beta.2`. Не використовуйте
+`v1.0.0-beta.1`: він має відомі дефекти metadata/bootstrap.
 
 ## 2. Перевірте SHA-256
 
 ### Linux
 
 ```bash
-sha256sum -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+sha256sum -c minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
 ```
 
 ### macOS
 
 ```bash
-shasum -a 256 -c minius_codex_lab-workspace-v1.0.0-beta.2.zip.sha256
+shasum -a 256 -c minius_codex_lab-workspace-v1.1.0-beta.1.zip.sha256
 ```
 
 ### Windows PowerShell
 
 ```powershell
 Get-FileHash `
-  .\minius_codex_lab-workspace-v1.0.0-beta.2.zip `
+  .\minius_codex_lab-workspace-v1.1.0-beta.1.zip `
   -Algorithm SHA256
 ```
 
@@ -383,7 +384,7 @@ docs/GIT_WORKFLOW.md
 2. Переконайтеся, що відображаються очікувані `SessionStart` і `Stop`.
 3. Перевірте визначення hooks до надання довіри.
 4. Виконайте `/skills`.
-5. Переконайтеся, що виявлено всі 12 project skills.
+5. Переконайтеся, що виявлено всі 13 project skills.
 6. Через `/agent` перевірте спеціалізовані ролі.
 7. Виконуйте лише синтетичні сценарії з `docs/CODEX_SMOKE_TEST.md`.
 
